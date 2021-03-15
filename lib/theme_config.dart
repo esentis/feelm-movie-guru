@@ -18,7 +18,7 @@ ThemeData darkTheme = ThemeData.dark().copyWith(
     textTheme: TextTheme(
       // The default TextStyle for Material
       headline6: TextStyle(
-        color: pink,
+        color: whiteLight,
         fontSize: 20,
         fontFamily: 'JosefinSans',
       ),
