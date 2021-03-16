@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "946418053097",
+    "project_id": "feelm-movie-recommendations",
+    "storage_bucket": "feelm-movie-recommendations.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:946418053097:android:7b89047e5634b3597f2578",
+        "android_client_info": {
+          "package_name": "gr.esentis.feelm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "946418053097-plvk7k9m8jnql96301h7qome02h7iv32.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjhTyaVDr3lF0ZXvXMJkLTjuuyiYXq5zw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "946418053097-plvk7k9m8jnql96301h7qome02h7iv32.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
