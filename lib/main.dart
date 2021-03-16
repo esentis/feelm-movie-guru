@@ -6,7 +6,9 @@ import 'package:feelm/constants.dart';
 import 'package:feelm/theme_clipper.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
@@ -44,9 +46,24 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double left = 0;
   int random;
+
+  Future<UserCredential> signInWithFacebook() async {
+    // Trigger the sign-in flow
+    var result = await FacebookAuth.instance.login();
+
+    // Create a credential from the access token
+    FacebookAuthCredential facebookAuthCredential =
+        FacebookAuthProvider.credential(result.token);
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance
+        .signInWithCredential(facebookAuthCredential);
+  }
+
   @override
   void initState() {
     random = Random().nextInt(10);
+    signInWithFacebook();
     super.initState();
   }
 
