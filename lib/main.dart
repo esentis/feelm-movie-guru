@@ -47,23 +47,28 @@ class _MyHomePageState extends State<MyHomePage> {
   double left = 0;
   int random;
 
+  // ignore: missing_return
   Future<UserCredential> signInWithFacebook() async {
-    // Trigger the sign-in flow
-    var result = await FacebookAuth.instance.login();
-
-    // Create a credential from the access token
-    FacebookAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(result.token);
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance
-        .signInWithCredential(facebookAuthCredential);
+    try {
+      // Trigger the sign-in flow
+      var result = await FacebookAuth.instance.login();
+      // Create a credential from the access token
+      FacebookAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(result.token);
+      // ignore: omit_local_variable_types
+      UserCredential user = await FirebaseAuth.instance
+          .signInWithCredential(facebookAuthCredential);
+      // Once signed in, return the UserCredential
+      return user;
+    } catch (e) {
+      kLog.e(e.message);
+    }
   }
 
   @override
   void initState() {
+    // To randomize the background image
     random = Random().nextInt(10);
-    signInWithFacebook();
     super.initState();
   }
 
@@ -143,61 +148,72 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      GestureDetector(
-                        onTap: () {},
-                        child: PlayAnimation<double>(
-                          tween: 0.0.tweenTo(200.0),
-                          duration: 500.milliseconds,
-                          curve: Curves.easeInOut,
-                          builder: (context, child, value) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                30,
-                              ),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 5,
-                                  sigmaY: 5,
+                      PlayAnimation<double>(
+                        tween: 0.0.tweenTo(200.0),
+                        duration: 500.milliseconds,
+                        curve: Curves.easeInOut,
+                        builder: (context, child, value) {
+                          return Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  30,
                                 ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: cielLight.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(
-                                      12,
-                                    ),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 5,
+                                    sigmaY: 5,
                                   ),
-                                  width: value * 1.1,
-                                  height: value * .7,
-                                  child: AnimatedOpacity(
-                                    opacity: value == 200 ? 1 : 0,
-                                    duration: 2.seconds,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Flexible(
-                                            child: FeelmTextField(
-                                              context: context,
-                                              label: 'Username',
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: cielLight.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(
+                                        12,
+                                      ),
+                                    ),
+                                    width: value * 1.1,
+                                    height: value * .7,
+                                    child: AnimatedOpacity(
+                                      opacity: value == 200 ? 1 : 0,
+                                      duration: 2.seconds,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: FeelmTextField(
+                                                context: context,
+                                                label: 'Username',
+                                              ),
                                             ),
-                                          ),
-                                          Flexible(
-                                            child: FeelmTextField(
-                                              context: context,
-                                              label: 'Password',
+                                            Flexible(
+                                              child: FeelmTextField(
+                                                context: context,
+                                                label: 'Password',
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                              GestureDetector(
+                                onTap: () async {
+                                  await signInWithFacebook();
+                                },
+                                child: const FaIcon(
+                                  FontAwesomeIcons.facebook,
+                                  size: 30,
+                                  color: Color(0xff2E89FF),
+                                ),
+                              )
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
