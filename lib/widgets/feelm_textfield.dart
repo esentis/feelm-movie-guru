@@ -7,9 +7,9 @@ class FeelmTextField extends StatelessWidget {
   final BuildContext context;
   final String label;
   const FeelmTextField({
-    @required this.context,
-    @required this.label,
-    Key key,
+    required this.context,
+    required this.label,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -17,7 +17,7 @@ class FeelmTextField extends StatelessWidget {
     return TextField(
       textAlign: TextAlign.center,
       style: kStyleLight.copyWith(
-        color: ThemeProvider.of(context).brightness == Brightness.light
+        color: ThemeProvider.of(context)!.brightness == Brightness.light
             ? purpleDark
             : pink,
       ),
@@ -39,7 +39,7 @@ class FeelmTextField extends StatelessWidget {
         ),
         labelText: label,
         labelStyle: kStyleLight.copyWith(
-          color: ThemeProvider.of(context).brightness == Brightness.light
+          color: ThemeProvider.of(context)!.brightness == Brightness.light
               ? purpleDark
               : whiteLight,
         ),

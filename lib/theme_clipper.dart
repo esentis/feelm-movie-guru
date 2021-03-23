@@ -7,15 +7,15 @@ class ThemeCustomClipper implements ThemeSwitcherClipper {
   const ThemeCustomClipper();
 
   @override
-  Path getClip(Size size, Offset offset, double sizeRate) {
+  Path getClip(Size size, Offset? offset, double? sizeRate) {
     return Path()
       ..addOval(
-          Rect.fromCircle(center: offset, radius: size.height * sizeRate));
+          Rect.fromCircle(center: offset!, radius: size.height * sizeRate!));
   }
 
   @override
   bool shouldReclip(
-      CustomClipper<Path> oldClipper, Offset offset, double sizeRate) {
+      CustomClipper<Path> oldClipper, Offset? offset, double? sizeRate) {
     return true;
   }
 }

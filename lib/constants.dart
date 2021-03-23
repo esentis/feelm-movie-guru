@@ -12,19 +12,19 @@ TextStyle kStyleLight = const TextStyle(
 );
 
 // ignore: missing_return
-Future<UserCredential> signInWithFacebook() async {
+Future<UserCredential?> signInWithFacebook() async {
   try {
     // Trigger the sign-in flow
     var result = await FacebookAuth.instance.login();
     // Create a credential from the access token
-    FacebookAuthCredential facebookAuthCredential =
-        FacebookAuthProvider.credential(result.token);
+    var facebookAuthCredential =
+        FacebookAuthProvider.credential(result.token) as FacebookAuthCredential;
     // ignore: omit_local_variable_types
     UserCredential user = await FirebaseAuth.instance
         .signInWithCredential(facebookAuthCredential);
     // Once signed in, return the UserCredential
     return user;
-  } catch (e) {
+  } on FacebookAuthException catch (e) {
     kLog.e(e.message);
   }
 }

@@ -32,20 +32,20 @@ class Movie {
     this.voteAverage,
   });
 
-  String posterPath;
-  bool adult;
-  String overview;
-  DateTime releaseDate;
-  List<int> genreIds;
-  int id;
-  String originalTitle;
-  String originalLanguage;
-  String title;
-  String backdropPath;
-  double popularity;
-  int voteCount;
-  bool video;
-  double voteAverage;
+  String? posterPath;
+  bool? adult;
+  String? overview;
+  DateTime? releaseDate;
+  List<int>? genreIds;
+  int? id;
+  String? originalTitle;
+  String? originalLanguage;
+  String? title;
+  String? backdropPath;
+  double? popularity;
+  int? voteCount;
+  bool? video;
+  double? voteAverage;
 
   factory Movie.fromMap(Map<String, dynamic> json) => Movie(
         posterPath: json['poster_path'],
@@ -69,8 +69,8 @@ class Movie {
         'adult': adult,
         'overview': overview,
         'release_date':
-            "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
-        'genre_ids': List<dynamic>.from(genreIds.map((x) => x)),
+            "${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}",
+        'genre_ids': List<dynamic>.from(genreIds!.map((x) => x)),
         'id': id,
         'original_title': originalTitle,
         'original_language': originalLanguage,
@@ -91,10 +91,10 @@ class MovieSearchResults {
     this.totalPages,
   });
 
-  int page;
-  List<Movie> results;
-  int totalResults;
-  int totalPages;
+  int? page;
+  List<Movie>? results;
+  int? totalResults;
+  int? totalPages;
 
   factory MovieSearchResults.fromMap(Map<String, dynamic> json) =>
       MovieSearchResults(
@@ -106,7 +106,7 @@ class MovieSearchResults {
 
   Map<String, dynamic> toMap() => {
         'page': page,
-        'results': List<dynamic>.from(results.map((x) => x.toMap())),
+        'results': List<dynamic>.from(results!.map((x) => x.toMap())),
         'total_results': totalResults,
         'total_pages': totalPages,
       };
@@ -141,31 +141,31 @@ class MovieDetailed {
     this.voteCount,
   });
 
-  bool adult;
-  String backdropPath;
+  bool? adult;
+  String? backdropPath;
   dynamic belongsToCollection;
-  int budget;
-  List<Genre> genres;
-  String homepage;
-  int id;
-  String imdbId;
-  String originalLanguage;
-  String originalTitle;
-  String overview;
-  double popularity;
+  int? budget;
+  List<Genre>? genres;
+  String? homepage;
+  int? id;
+  String? imdbId;
+  String? originalLanguage;
+  String? originalTitle;
+  String? overview;
+  double? popularity;
   dynamic posterPath;
-  List<ProductionCompany> productionCompanies;
-  List<ProductionCountry> productionCountries;
-  DateTime releaseDate;
-  int revenue;
-  int runtime;
-  List<SpokenLanguage> spokenLanguages;
-  String status;
-  String tagline;
-  String title;
-  bool video;
-  double voteAverage;
-  int voteCount;
+  List<ProductionCompany>? productionCompanies;
+  List<ProductionCountry>? productionCountries;
+  DateTime? releaseDate;
+  int? revenue;
+  int? runtime;
+  List<SpokenLanguage>? spokenLanguages;
+  String? status;
+  String? tagline;
+  String? title;
+  bool? video;
+  double? voteAverage;
+  int? voteCount;
 
   factory MovieDetailed.fromMap(Map<String, dynamic> json) => MovieDetailed(
         adult: json['adult'],
@@ -205,7 +205,7 @@ class MovieDetailed {
         'backdrop_path': backdropPath,
         'belongs_to_collection': belongsToCollection,
         'budget': budget,
-        'genres': List<dynamic>.from(genres.map((x) => x.toMap())),
+        'genres': List<dynamic>.from(genres!.map((x) => x.toMap())),
         'homepage': homepage,
         'id': id,
         'imdb_id': imdbId,
@@ -215,15 +215,15 @@ class MovieDetailed {
         'popularity': popularity,
         'poster_path': posterPath,
         'production_companies':
-            List<dynamic>.from(productionCompanies.map((x) => x.toMap())),
+            List<dynamic>.from(productionCompanies!.map((x) => x.toMap())),
         'production_countries':
-            List<dynamic>.from(productionCountries.map((x) => x.toMap())),
+            List<dynamic>.from(productionCountries!.map((x) => x.toMap())),
         'release_date':
-            "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
+            "${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}",
         'revenue': revenue,
         'runtime': runtime,
         'spoken_languages':
-            List<dynamic>.from(spokenLanguages.map((x) => x.toMap())),
+            List<dynamic>.from(spokenLanguages!.map((x) => x.toMap())),
         'status': status,
         'tagline': tagline,
         'title': title,
@@ -240,9 +240,9 @@ class MovieCredits {
     this.crew,
   });
 
-  int id;
-  List<Cast> cast;
-  List<Cast> crew;
+  int? id;
+  List<Cast>? cast;
+  List<Cast>? crew;
 
   factory MovieCredits.fromMap(Map<String, dynamic> json) => MovieCredits(
         id: json['id'],
@@ -252,7 +252,7 @@ class MovieCredits {
 
   Map<String, dynamic> toMap() => {
         'id': id,
-        'cast': List<dynamic>.from(cast.map((x) => x.toMap())),
-        'crew': List<dynamic>.from(crew.map((x) => x.toMap())),
+        'cast': List<dynamic>.from(cast!.map((x) => x.toMap())),
+        'crew': List<dynamic>.from(crew!.map((x) => x.toMap())),
       };
 }

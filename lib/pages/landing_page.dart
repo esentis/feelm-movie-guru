@@ -12,7 +12,7 @@ import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key key}) : super(key: key);
+  const LandingPage({Key? key}) : super(key: key);
 
   @override
   _LandingPageState createState() => _LandingPageState();
@@ -20,7 +20,7 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   double left = 0;
-  int random;
+  int? random;
 
   @override
   void initState() {
@@ -77,9 +77,9 @@ class _LandingPageState extends State<LandingPage> {
                         builder: (context) => IconButton(
                           onPressed: () {
                             kLog.wtf(WidgetsBinding
-                                .instance.window.platformBrightness);
-                            ThemeSwitcher.of(context).changeTheme(
-                              theme: ThemeProvider.of(context).brightness ==
+                                .instance!.window.platformBrightness);
+                            ThemeSwitcher.of(context)!.changeTheme(
+                              theme: ThemeProvider.of(context)!.brightness ==
                                       Brightness.light
                                   ? darkTheme
                                   : lightTheme,
@@ -87,11 +87,11 @@ class _LandingPageState extends State<LandingPage> {
                           },
                           tooltip: 'Change theme',
                           icon: FaIcon(
-                            ThemeProvider.of(context).brightness ==
+                            ThemeProvider.of(context)!.brightness ==
                                     Brightness.light
                                 ? FontAwesomeIcons.moon
                                 : FontAwesomeIcons.sun,
-                            color: ThemeProvider.of(context).brightness ==
+                            color: ThemeProvider.of(context)!.brightness ==
                                     Brightness.light
                                 ? purpleDark
                                 : Colors.yellow,

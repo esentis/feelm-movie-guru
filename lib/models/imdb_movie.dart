@@ -37,31 +37,31 @@ class ImdbMovie {
     this.response,
   });
 
-  String title;
-  String year;
-  String rated;
-  String released;
-  String runtime;
-  String genre;
-  String director;
-  String writer;
-  String actors;
-  String plot;
-  String language;
-  String country;
-  String awards;
-  String poster;
-  List<Rating> ratings;
-  String metascore;
-  String imdbRating;
-  String imdbVotes;
-  String imdbId;
-  String type;
-  String dvd;
-  String boxOffice;
-  String production;
-  String website;
-  String response;
+  String? title;
+  String? year;
+  String? rated;
+  String? released;
+  String? runtime;
+  String? genre;
+  String? director;
+  String? writer;
+  String? actors;
+  String? plot;
+  String? language;
+  String? country;
+  String? awards;
+  String? poster;
+  List<Rating>? ratings;
+  String? metascore;
+  String? imdbRating;
+  String? imdbVotes;
+  String? imdbId;
+  String? type;
+  String? dvd;
+  String? boxOffice;
+  String? production;
+  String? website;
+  String? response;
 
   factory ImdbMovie.fromMap(Map<String, dynamic> json) => ImdbMovie(
         title: json['Title'] ?? '',
@@ -115,7 +115,7 @@ class ImdbMovie {
         'Poster': poster ?? '',
         'Ratings': ratings == null
             ? []
-            : List<dynamic>.from(ratings.map((x) => x.toMap())),
+            : List<dynamic>.from(ratings!.map((x) => x.toMap())),
         'Metascore': metascore ?? '',
         'imdbRating': imdbRating ?? '',
         'imdbVotes': imdbVotes ?? '',
@@ -135,8 +135,8 @@ class Rating {
     this.value,
   });
 
-  String source;
-  String value;
+  String? source;
+  String? value;
 
   factory Rating.fromMap(Map<String, dynamic> json) => Rating(
         source: json['Source'] ?? '',
