@@ -3,10 +3,13 @@ import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:flutter/material.dart';
+// ignore: library_prefixes
+import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
-void main() => runApp(MyApp());
-
-enum AniProps { width, height, color }
+void main() async {
+  await DotEnv.load(fileName: '.env');
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
