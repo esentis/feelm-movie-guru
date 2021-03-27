@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:feelm/constants.dart';
+import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/movie.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -15,8 +16,12 @@ Dio tmdb = Dio(dioTmdbOptions);
 Future getTrending() async {
   Response response;
   try {
-    response =
-        await tmdb.get('/3/trending/movie/day?api_key=${env['TMDB_KEY']}');
+    response = await tmdb.get(
+      '/3/trending/movie/day',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+      },
+    );
     kLog.i('Getting trending movies.');
   } on DioError catch (e) {
     kLog.e(e);
@@ -35,7 +40,15 @@ Future searchMovies(String term) async {
   Response response;
   try {
     response = await tmdb.get(
-        '/3/search/movie?api_key=${env['TMDB_KEY']}&language=en-US&query=$term&page=1&include_adult=false');
+      '/3/search/movie',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'language': 'en-US',
+        'include_adult': false,
+        'page': 1,
+        'query': term,
+      },
+    );
     kLog.i('Searching $term in movies.');
   } on DioError catch (e) {
     kLog.e(e);
@@ -51,8 +64,13 @@ Future searchMovies(String term) async {
 Future getMovie(int id) async {
   Response response;
   try {
-    response = await tmdb
-        .get('/3/movie/$id?api_key=${env['TMDB_KEY']}&language=en-US');
+    response = await tmdb.get(
+      '/3/movie/$id',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'language': 'en-US',
+      },
+    );
     kLog.i('Searching movie with ID : $id.');
   } on DioError catch (e) {
     kLog.e(e);
@@ -67,8 +85,12 @@ Future getMovie(int id) async {
 Future getCredits(int id) async {
   Response response;
   try {
-    response =
-        await tmdb.get('/3/movie/$id/credits?api_key=${env['TMDB_KEY']}');
+    response = await tmdb.get(
+      '/3/movie/$id/credits',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+      },
+    );
     kLog.i('Getting credings for movie with ID : $id.');
   } on DioError catch (e) {
     kLog.e(e);
@@ -84,7 +106,14 @@ Future getUpcoming() async {
   Response response;
   try {
     response = await tmdb.get(
-        '/3/movie/upcoming?api_key=${env['TMDB_KEY']}&language=en-US&page=1');
+      '/3/movie/upcoming',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'language': 'en-US',
+        'include_adult': false,
+        'page': 1,
+      },
+    );
     kLog.i('Getting upcoming movies');
   } on DioError catch (e) {
     kLog.e(e);
@@ -98,16 +127,47 @@ Future getUpcoming() async {
   return upcomingMovies;
 }
 
-/// Returns the latest movie created in the database.
-Future getLatest() async {
-  Response response;
+/// Search for movie keywords associated with a specific [term].
+Future<KeywordResults> getKeywords(String term) async {
   try {
-    response = await tmdb
-        .get('/3/movie/latest?api_key=${env['TMDB_KEY']}&language=en-US');
-    kLog.i('Getting latest movie added');
+    var response = await tmdb.get(
+      '/3/search/keyword',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'query': term,
+      },
+    );
+
+    return KeywordResults.fromJson(response.data);
   } on DioError catch (e) {
-    kLog.e(e);
-    return e.type;
+    kLog.e(e.message);
+    return KeywordResults.error();
   }
-  return response.data;
+}
+
+/// Discover movies with [keywords]. [keywords] is a string with concatinated Keyword ids.
+///
+/// Keyword ids can be created by searching keywords with:
+/// ```dart
+/// getKeywords(String term)
+/// ```
+/// which returns a list of keywords used by movies.
+Future<List<Movie>> discoverMovies(String keywords) async {
+  try {
+    var response = await tmdb.get(
+      '/3/discover/movie',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'with_keywords': keywords,
+      },
+    );
+    var discoveredMovies = <Movie>[];
+    response.data['results'].forEach((jsonMovie) {
+      discoveredMovies.add(Movie.fromMap(jsonMovie));
+    });
+    return discoveredMovies;
+  } on DioError catch (e) {
+    kLog.e(e.message);
+    return [];
+  }
 }
