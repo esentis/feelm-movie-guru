@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/theme_clipper.dart';
 import 'package:feelm/theme_config.dart';
@@ -160,7 +161,25 @@ class _LandingPageState extends State<LandingPage> {
                               ),
                               GestureDetector(
                                 onTap: () async {
-                                  await signInWithFacebook();
+                                  // await signInWithFacebook();
+                                  var x = await getKeywords('interview');
+                                  var keywordIds = List.generate(
+                                    x.keywords.length,
+                                    (index) => x.keywords[index].id.toString(),
+                                  );
+
+                                  kLog.wtf(
+                                    List.generate(x.keywords.length,
+                                        (index) => x.keywords[index].name),
+                                  );
+
+                                  // var stringKeywords = keywordIds.join(',');
+                                  // kLog.wtf(stringKeywords);
+                                  var z = await discoverMovies(keywordIds.last);
+                                  kLog.wtf(
+                                    List.generate(
+                                        z.length, (index) => z[index].title),
+                                  );
                                 },
                                 child: const FaIcon(
                                   FontAwesomeIcons.facebook,
