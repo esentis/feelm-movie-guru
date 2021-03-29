@@ -1,4 +1,3 @@
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +16,7 @@ class FeelmTextField extends StatelessWidget {
     return TextField(
       textAlign: TextAlign.center,
       style: kStyleLight.copyWith(
-        color: ThemeProvider.of(context)!.brightness == Brightness.light
-            ? purpleDark
-            : pink,
+        color: pink,
       ),
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
@@ -39,9 +36,7 @@ class FeelmTextField extends StatelessWidget {
         ),
         labelText: label,
         labelStyle: kStyleLight.copyWith(
-          color: ThemeProvider.of(context)!.brightness == Brightness.light
-              ? purpleDark
-              : whiteLight,
+          color: whiteLight,
         ),
       ),
     );
