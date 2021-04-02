@@ -1,11 +1,13 @@
 import 'dart:ui';
 import 'package:feelm/pages/landing_page.dart';
+import 'package:feelm/providers/keywords_provider.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
 import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:provider/provider.dart';
 
 void main() async {
   await DotEnv.load(fileName: '.env');
@@ -28,10 +30,17 @@ class MyApp extends StatelessWidget {
     var isPlatformDark =
         WidgetsBinding.instance!.window.platformBrightness == Brightness.dark;
     var initTheme = isPlatformDark ? darkTheme : lightTheme;
-    return MaterialApp(
-      title: 'Feelm Movie Guru',
-      theme: initTheme,
-      home: const LandingPage(),
+    return MultiProvider(
+      providers: [
+        Provider<KeywordsProvider>(
+          create: (_) => KeywordsProvider(),
+        )
+      ],
+      child: MaterialApp(
+        title: 'Feelm Movie Guru',
+        theme: initTheme,
+        home: const LandingPage(),
+      ),
     );
   }
 }
