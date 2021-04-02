@@ -1,13 +1,14 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:feelm/constants.dart';
+import 'package:feelm/providers/keywords_provider.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
+import 'package:provider/provider.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -30,6 +31,7 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
+    var words = Provider.of<KeywordsProvider>(context);
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -114,7 +116,7 @@ class _LandingPageState extends State<LandingPage> {
                                               Flexible(
                                                 child: GestureDetector(
                                                   onTap: () async {
-                                                    await signInWithFacebook();
+                                                    // await signInWithFacebook();
                                                     // var x = await getKeywords('interview');
                                                     // var keywordIds = List.generate(
                                                     //   x.keywords.length,
