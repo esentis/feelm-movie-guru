@@ -20,10 +20,10 @@ class Keyword {
   });
 
   String name;
-  int id;
+  String id;
 
-  factory Keyword.fromJson(Map<String, dynamic> json) => Keyword(
-        name: json['name'],
+  factory Keyword.fromJson(Map<String, dynamic>? json) => Keyword(
+        name: json!['name'],
         id: json['id'],
       );
 
