@@ -26,4 +26,11 @@ class ZodiacSign {
         to: map['to'].toDate(),
         image: map['image'] ?? '',
       );
+
+  factory ZodiacSign.error() => ZodiacSign(
+      from: DateTime.now(),
+      keywords: [],
+      name: 'Error',
+      to: DateTime.now(),
+      image: '');
 }
