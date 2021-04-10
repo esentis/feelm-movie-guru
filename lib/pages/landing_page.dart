@@ -6,12 +6,12 @@ import 'package:feelm/models/keyword.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_picker/flutter_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:provider/provider.dart';
 import 'package:feelm/models/sign.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -24,6 +24,19 @@ class _LandingPageState extends State<LandingPage> {
   double left = 0;
   int? random;
   CustomAnimationControl _animationControl = CustomAnimationControl.PLAY;
+
+  void showPickerDate(BuildContext context) {
+    Picker(
+        hideHeader: true,
+        adapter: DateTimePickerAdapter(),
+        title: const Text('Select Data'),
+        selectedTextStyle: const TextStyle(color: Colors.blue),
+        onConfirm: (Picker picker, List value) {
+          var date = (picker.adapter as DateTimePickerAdapter).value;
+          kLog.wtf(getSign(date!));
+        }).showDialog(context);
+  }
+
   @override
   void initState() {
     // To randomize the background image
@@ -67,50 +80,6 @@ class _LandingPageState extends State<LandingPage> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  SfDateRangePicker(
-                    confirmText: 'Are u sure?',
-                    backgroundColor: Colors.white.withOpacity(0.6),
-                    showActionButtons: true,
-                    minDate: signs[0].from,
-                    maxDate: signs.last.to,
-                    selectionTextStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                    monthCellStyle: DateRangePickerMonthCellStyle(
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                      ),
-                      cellDecoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    onSubmit: (value) {
-                      var birthDate = value as DateTime;
-                      kLog.wtf(birthDate);
-
-                      kLog.wtf(signs
-                          .where(
-                            (sign) {
-                              //This check is only for capricorn since the year changes
-                              return birthDate.isBetween(sign.from, sign.to);
-                            },
-                          )
-                          .first
-                          .name);
-                    },
-                    view: DateRangePickerView.decade,
-                    selectionMode: DateRangePickerSelectionMode.single,
-                    headerHeight: 40,
-                    headerStyle: const DateRangePickerHeaderStyle(
-                      backgroundColor: Colors.white,
-                      textAlign: TextAlign.center,
-                    ),
-                    onSelectionChanged: (value) {
-                      // kLog.wtf(value.value);
-                    },
-                  ),
                   CustomAnimation<double>(
                       tween: 0.0.tweenTo(400.0),
                       duration: 900.milliseconds,
@@ -207,6 +176,7 @@ class _LandingPageState extends State<LandingPage> {
                                 ),
                                 GestureDetector(
                                   onTap: () async {
+                                    showPickerDate(context);
                                     setState(
                                       () {
                                         _animationControl ==

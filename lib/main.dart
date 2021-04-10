@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -27,15 +28,22 @@ void main() async {
       version: 'v9.0',
     );
   }
-  runApp(MyApp());
+  var isPlatformDark =
+      WidgetsBinding.instance!.window.platformBrightness == Brightness.dark;
+
+  var initTheme = isPlatformDark ? darkTheme : lightTheme;
+  runApp(
+    GetMaterialApp(
+      title: 'Feelm Movie Guru',
+      theme: initTheme,
+      home: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var isPlatformDark =
-        WidgetsBinding.instance!.window.platformBrightness == Brightness.dark;
-    var initTheme = isPlatformDark ? darkTheme : lightTheme;
     return MultiProvider(
       providers: [
         FutureProvider<List<Keyword>>(
@@ -55,11 +63,7 @@ class MyApp extends StatelessWidget {
           create: (_) => getSigns(),
         )
       ],
-      child: MaterialApp(
-        title: 'Feelm Movie Guru',
-        theme: initTheme,
-        home: const LandingPage(),
-      ),
+      child: const LandingPage(),
     );
   }
 }
