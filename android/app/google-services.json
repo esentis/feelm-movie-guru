@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "946418053097-t1upddjggg1i1qm2klgeat9lftm9h8e3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gr.esentis.feelm",
+            "certificate_hash": "fe26740b971ba76ec388ee58530b8b79ead9796a"
+          }
+        },
+        {
           "client_id": "946418053097-plvk7k9m8jnql96301h7qome02h7iv32.apps.googleusercontent.com",
           "client_type": 3
         }
