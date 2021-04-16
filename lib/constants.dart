@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 
 var kLog = Logger();
@@ -9,6 +10,8 @@ TextStyle kStyleLight = const TextStyle(
   fontFamily: 'JosefinSans',
   fontWeight: FontWeight.w100,
 );
+
+Color kColorMain = const Color(0xfff9a821);
 
 Future<AccessToken?> signInWithFacebook() async {
   var result = await FacebookAuth.instance
@@ -26,6 +29,21 @@ Future<AccessToken?> signInWithFacebook() async {
   kLog.e(result.status);
   kLog.e(result.message);
   return null;
+}
+
+GoogleSignIn googleSignIn = GoogleSignIn(
+  scopes: <String>[
+    'email',
+  ],
+);
+
+Future<void> googleSign() async {
+  try {
+    var googleUser = await googleSignIn.signIn();
+    kLog.i(googleUser?.email);
+  } catch (error) {
+    kLog.e(error);
+  }
 }
 
 String getSign(DateTime birthDate) {

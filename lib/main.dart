@@ -35,6 +35,7 @@ void main() async {
   runApp(
     GetMaterialApp(
       title: 'Feelm Movie Guru',
+      debugShowCheckedModeBanner: false,
       theme: initTheme,
       home: MyApp(),
     ),
