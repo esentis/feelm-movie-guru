@@ -1,3 +1,4 @@
+import 'package:feelm/constants.dart';
 import 'package:flutter/material.dart';
 
 // Dark theme color pallette.
@@ -8,6 +9,11 @@ Color pink = const Color(0xffe9b0df);
 ThemeData darkTheme = ThemeData.dark().copyWith(
   primaryColor: purpleDark,
   scaffoldBackgroundColor: purpleLight,
+  hintColor: kColorMain,
+  errorColor: kColorMain,
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: kColorMain,
+  ),
   iconTheme: IconThemeData(
     color: pink,
   ),
@@ -39,13 +45,19 @@ Color cielLight = const Color(0xffccf2f4);
 Color cielDark = const Color(0xffa4ebf3);
 
 ThemeData lightTheme = ThemeData.light().copyWith(
-  primaryColor: cielLight,
+  primaryColor: purpleDark,
   scaffoldBackgroundColor: whiteLight,
+  // TextInput hint color
+  hintColor: kColorMain,
+  errorColor: purpleDark,
+  textSelectionTheme: TextSelectionThemeData(
+    cursorColor: purpleDark,
+  ),
   iconTheme: IconThemeData(
-    color: cielDark,
+    color: purpleDark,
   ),
   appBarTheme: AppBarTheme(
-    shadowColor: cielDark.withOpacity(0.5),
+    shadowColor: purpleDark.withOpacity(0.5),
     elevation: 2,
     centerTitle: true,
     textTheme: TextTheme(
@@ -56,13 +68,6 @@ ThemeData lightTheme = ThemeData.light().copyWith(
         fontFamily: 'JosefinSans',
         fontWeight: FontWeight.w600,
       ),
-    ),
-  ),
-  textTheme: TextTheme(
-    // The default TextStyle for Material
-    bodyText2: TextStyle(
-      color: purpleDark,
-      fontSize: 20,
     ),
   ),
 );
