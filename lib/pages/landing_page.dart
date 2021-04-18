@@ -5,19 +5,10 @@ import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_picker/flutter_picker.dart';
-import 'package:fluttericon/brandico_icons.dart';
 import 'package:fluttericon/elusive_icons.dart';
-import 'package:fluttericon/font_awesome_icons.dart';
-import 'package:fluttericon/fontelico_icons.dart';
-import 'package:fluttericon/iconic_icons.dart';
-import 'package:fluttericon/linecons_icons.dart';
-import 'package:fluttericon/maki_icons.dart';
-import 'package:fluttericon/mfg_labs_icons.dart';
-import 'package:fluttericon/modern_pictograms_icons.dart';
-import 'package:fluttericon/rpg_awesome_icons.dart';
-import 'package:fluttericon/web_symbols_icons.dart';
 import 'package:fluttericon/zocial_icons.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -34,13 +25,18 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   double left = 0;
+  bool showLogin = true;
   int? random;
+
   CustomAnimationControl _loginContainerAnimationController =
       CustomAnimationControl.PLAY_REVERSE;
 
-  AnimationController? _weatherAnimationController;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  AnimationController? themeController;
 
   void showPickerDate(BuildContext context) {
     Picker(
@@ -58,11 +54,12 @@ class _LandingPageState extends State<LandingPage>
   void initState() {
     // To randomize the background image
     random = Random().nextInt(10);
-    _weatherAnimationController = AnimationController(
+    themeController = AnimationController(
       vsync: this,
       duration: 700.milliseconds,
     );
     super.initState();
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
@@ -136,23 +133,21 @@ class _LandingPageState extends State<LandingPage>
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    if (_weatherAnimationController?.value == 0.7) {
-                      _weatherAnimationController?.animateTo(0.4);
+                    if (themeController?.value == 0.7) {
+                      themeController?.animateTo(0.4);
                       Get.changeTheme(lightTheme);
                     } else {
-                      _weatherAnimationController?.animateTo(0.7);
+                      themeController?.animateTo(0.7);
                       Get.changeTheme(darkTheme);
                     }
-                    kLog.wtf(_weatherAnimationController?.value);
+                    kLog.wtf(themeController?.value);
                   },
                   child: Lottie.asset(
                     'assets/switcher.json',
                     height: 40,
-                    controller: _weatherAnimationController,
+                    controller: themeController,
                     onLoaded: (composition) {
-                      _weatherAnimationController?.animateTo(0.4);
-
-                      kLog.wtf(composition);
+                      themeController?.animateTo(0.4);
                     },
                   ),
                 ),
@@ -207,18 +202,64 @@ class _LandingPageState extends State<LandingPage>
                                               Flexible(
                                                 child: FeelmTextField(
                                                   context: context,
-                                                  label: 'Username',
+                                                  controller: _emailController,
+                                                  label: 'Email',
                                                 ),
+                                              ),
+                                              const SizedBox(
+                                                height: 5,
                                               ),
                                               Flexible(
                                                 child: FeelmTextField(
                                                   context: context,
+                                                  isPassword: true,
+                                                  controller:
+                                                      _passwordController,
                                                   label: 'Password',
                                                 ),
                                               ),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
                                               Flexible(
                                                 child: ElevatedButton(
-                                                  onPressed: () {},
+                                                  onPressed: () async {
+                                                    if (showLogin) {
+                                                      try {
+                                                        var user = await kAuth
+                                                            .signInWithEmailAndPassword(
+                                                                email:
+                                                                    _emailController
+                                                                        .text,
+                                                                password:
+                                                                    _passwordController
+                                                                        .text);
+                                                        kLog.wtf(
+                                                            user.user?.uid);
+                                                      } on FirebaseAuthException catch (e) {
+                                                        Get.snackbar('Error',
+                                                            e.message!);
+                                                        kLog.e(e);
+                                                      }
+                                                    } else {
+                                                      try {
+                                                        var user = await kAuth
+                                                            .createUserWithEmailAndPassword(
+                                                                email:
+                                                                    _emailController
+                                                                        .text,
+                                                                password:
+                                                                    _passwordController
+                                                                        .text);
+                                                        kLog.wtf(
+                                                            user.user?.uid);
+                                                      } on FirebaseAuthException catch (e) {
+                                                        Get.snackbar('Error',
+                                                            e.message!);
+                                                        kLog.e(e);
+                                                      }
+                                                    }
+                                                  },
                                                   style: ButtonStyle(
                                                     shape: MaterialStateProperty
                                                         .resolveWith(
@@ -236,8 +277,34 @@ class _LandingPageState extends State<LandingPage>
                                                     ),
                                                   ),
                                                   child: Text(
-                                                    'Login',
+                                                    showLogin
+                                                        ? 'Login'
+                                                        : 'Register',
                                                     style: kStyleLight,
+                                                  ),
+                                                ),
+                                              ),
+                                              Flexible(
+                                                child: TextButton(
+                                                  onPressed: () {
+                                                    setState(
+                                                      () {
+                                                        showLogin
+                                                            ? showLogin =
+                                                                !showLogin
+                                                            : showLogin =
+                                                                !showLogin;
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    showLogin
+                                                        ? 'Register'
+                                                        : 'Login',
+                                                    style: kStyleLight.copyWith(
+                                                      color: Theme.of(context)
+                                                          .errorColor,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -257,7 +324,6 @@ class _LandingPageState extends State<LandingPage>
                                     GestureDetector(
                                       onTap: () async {
                                         //showPickerDate(context);
-
                                         setState(
                                           () {
                                             _loginContainerAnimationController ==
