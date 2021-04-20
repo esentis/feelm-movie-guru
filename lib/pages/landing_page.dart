@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
+import 'package:feelm/models/user.dart';
+import 'package:feelm/pages/movies_screen.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,8 +40,9 @@ class _LandingPageState extends State<LandingPage>
 
   AnimationController? themeController;
 
-  void showPickerDate(BuildContext context) {
-    Picker(
+  Future<String> showPickerDate(BuildContext context) async {
+    var sign = '';
+    await Picker(
         hideHeader: true,
         adapter: DateTimePickerAdapter(),
         title: const Text('Select Data'),
@@ -47,7 +50,9 @@ class _LandingPageState extends State<LandingPage>
         onConfirm: (Picker picker, List value) {
           var date = (picker.adapter as DateTimePickerAdapter).value;
           kLog.wtf(getSign(date!));
+          sign = getSign(date);
         }).showDialog(context);
+    return sign;
   }
 
   @override
@@ -56,7 +61,7 @@ class _LandingPageState extends State<LandingPage>
     random = Random().nextInt(10);
     themeController = AnimationController(
       vsync: this,
-      duration: 700.milliseconds,
+      duration: 900.milliseconds,
     );
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
@@ -66,6 +71,7 @@ class _LandingPageState extends State<LandingPage>
   Widget build(BuildContext context) {
     var words = Provider.of<List<Keyword>>(context);
     var signs = Provider.of<List<ZodiacSign>>(context);
+
     signs.sort((a, b) =>
         a.from.millisecondsSinceEpoch.compareTo(b.from.millisecondsSinceEpoch));
     return Scaffold(
@@ -89,7 +95,7 @@ class _LandingPageState extends State<LandingPage>
           // A smooth color layer at top of the background image
           Positioned.fill(
             child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.6),
+              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
             ),
           ),
 
@@ -133,21 +139,21 @@ class _LandingPageState extends State<LandingPage>
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    if (themeController?.value == 0.7) {
-                      themeController?.animateTo(0.4);
+                    if (themeController?.value == 0.5) {
+                      themeController?.animateTo(0);
                       Get.changeTheme(lightTheme);
                     } else {
-                      themeController?.animateTo(0.7);
+                      themeController?.animateTo(0.5);
                       Get.changeTheme(darkTheme);
                     }
                     kLog.wtf(themeController?.value);
                   },
                   child: Lottie.asset(
-                    'assets/switcher.json',
-                    height: 40,
+                    'assets/theme_switcher.json',
+                    height: 60,
                     controller: themeController,
                     onLoaded: (composition) {
-                      themeController?.animateTo(0.4);
+                      themeController?.animateTo(1);
                     },
                   ),
                 ),
@@ -224,6 +230,25 @@ class _LandingPageState extends State<LandingPage>
                                               Flexible(
                                                 child: ElevatedButton(
                                                   onPressed: () async {
+                                                    // var user = FirebaseAuth
+                                                    //     .instance.currentUser;
+                                                    // if (user != null) {
+                                                    //   await users
+                                                    //       .where('email',
+                                                    //           isEqualTo:
+                                                    //               user.email)
+                                                    //       .get()
+                                                    //       .then((qs) {
+                                                    //     kLog.wtf(qs.docs.first
+                                                    //         .data());
+                                                    //   }).catchError(
+                                                    //     // ignore: return_of_invalid_type_from_catch_error
+                                                    //     (error) => kLog.e(
+                                                    //       error.toString(),
+                                                    //     ),
+                                                    //   );
+                                                    // }
+
                                                     if (showLogin) {
                                                       try {
                                                         var user = await kAuth
@@ -236,6 +261,8 @@ class _LandingPageState extends State<LandingPage>
                                                                         .text);
                                                         kLog.wtf(
                                                             user.user?.uid);
+                                                        await Get.offAll(() =>
+                                                            MoviesScreen());
                                                       } on FirebaseAuthException catch (e) {
                                                         Get.snackbar('Error',
                                                             e.message!);
@@ -243,7 +270,7 @@ class _LandingPageState extends State<LandingPage>
                                                       }
                                                     } else {
                                                       try {
-                                                        var user = await kAuth
+                                                        var userCredential = await kAuth
                                                             .createUserWithEmailAndPassword(
                                                                 email:
                                                                     _emailController
@@ -251,8 +278,22 @@ class _LandingPageState extends State<LandingPage>
                                                                 password:
                                                                     _passwordController
                                                                         .text);
-                                                        kLog.wtf(
-                                                            user.user?.uid);
+                                                        var sign =
+                                                            await showPickerDate(
+                                                                context);
+                                                        createUser(
+                                                          GuruUser(
+                                                            email:
+                                                                userCredential
+                                                                    .user
+                                                                    ?.email,
+                                                            joinDate:
+                                                                DateTime.now(),
+                                                            zodiacSign: sign,
+                                                          ),
+                                                        );
+                                                        await Get.offAll(() =>
+                                                            MoviesScreen());
                                                       } on FirebaseAuthException catch (e) {
                                                         Get.snackbar('Error',
                                                             e.message!);
@@ -352,7 +393,23 @@ class _LandingPageState extends State<LandingPage>
                                               'Total keywords ${words.length}');
                                           kLog.wtf(
                                               'Total Zodiac Signs ${signs[1].keywords.length}');
-                                          await signInWithFacebook();
+                                          var user = await signInWithFacebook();
+                                          if (await checkMail(
+                                              user!.user!.email)) {
+                                            kLog.i(
+                                                '${user.user!.email} is not a user');
+                                            var sign =
+                                                await showPickerDate(context);
+                                            createUser(
+                                              GuruUser(
+                                                email: user.user!.email,
+                                                zodiacSign: sign,
+                                                joinDate: DateTime.now(),
+                                              ),
+                                            );
+                                            await Get.offAll(
+                                                () => MoviesScreen());
+                                          }
                                           // var x = await getKeywords('interview');
                                           // var keywordIds = List.generate(
                                           //   x.keywords.length,
@@ -385,7 +442,23 @@ class _LandingPageState extends State<LandingPage>
                                     Flexible(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          await googleSign();
+                                          var user = await googleSign();
+                                          if (await checkMail(
+                                              user!.user!.email)) {
+                                            kLog.i(
+                                                '${user.user!.email} is not a user');
+                                            var sign =
+                                                await showPickerDate(context);
+                                            createUser(
+                                              GuruUser(
+                                                email: user.user!.email,
+                                                zodiacSign: sign,
+                                                joinDate: DateTime.now(),
+                                              ),
+                                            );
+                                            await Get.offAll(
+                                                () => MoviesScreen());
+                                          }
                                         },
                                         child: Icon(
                                           Zocial.google,

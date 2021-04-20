@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 
+FirebaseFirestore kFirestore = FirebaseFirestore.instance;
 var kLog = Logger();
 var kAuth = FirebaseAuth.instance;
 
@@ -15,17 +17,16 @@ TextStyle kStyleLight = const TextStyle(
 
 Color kColorMain = const Color(0xfff9a821);
 
-Future<AccessToken?> signInWithFacebook() async {
+Future<UserCredential?> signInWithFacebook() async {
   var result = await FacebookAuth.instance
       .login(); // Request email and the public profile
+
   if (result.status == LoginStatus.success) {
-    // get the user data
-    // by default we get the userId, email,name and picture
-    var userData = await FacebookAuth.instance.getUserData();
-    // final userData = await FacebookAuth.instance.getUserData(fields: "email,birthday,friends,gender,link");
-    kLog.i(userData);
-    kLog.i(result.accessToken?.token);
-    return result.accessToken;
+    // Create a credential from the access token
+    var facebookAuthCredential =
+        FacebookAuthProvider.credential(result.accessToken!.token);
+    // Once signed in, return the UserCredential
+    return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
   }
 
   kLog.e(result.status);
@@ -39,10 +40,20 @@ GoogleSignIn googleSignIn = GoogleSignIn(
   ],
 );
 
-Future<void> googleSign() async {
+Future<UserCredential?> googleSign() async {
   try {
+    // Trigger the authentication flow
     var googleUser = await googleSignIn.signIn();
-    kLog.i(googleUser?.email);
+    // Obtain the auth details from the request
+    var googleAuth = await googleUser?.authentication;
+    // Create a new credential
+    var credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth!.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    // Once signed in, return the UserCredential
+    var user = await FirebaseAuth.instance.signInWithCredential(credential);
+    return user;
   } catch (error) {
     kLog.e(error);
   }
