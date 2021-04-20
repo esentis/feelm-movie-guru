@@ -46,7 +46,7 @@ Color cielDark = const Color(0xffa4ebf3);
 
 ThemeData lightTheme = ThemeData.light().copyWith(
   primaryColor: purpleDark,
-  scaffoldBackgroundColor: whiteLight,
+  scaffoldBackgroundColor: cielDark,
   // TextInput hint color
   hintColor: kColorMain,
   errorColor: purpleDark,

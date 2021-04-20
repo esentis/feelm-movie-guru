@@ -2,9 +2,12 @@ import 'dart:ui';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/sign.dart';
+import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
+import 'package:feelm/pages/movies_screen.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/theme_config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
@@ -18,6 +21,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await DotEnv.load(fileName: '.env');
+  var currentUser = await FirebaseAuth.instance.currentUser?.toGuruUser();
   // check if is running on Web
   if (kIsWeb) {
     // initialiaze the facebook javascript SDK
@@ -37,12 +41,14 @@ void main() async {
       title: 'Feelm Movie Guru',
       debugShowCheckedModeBanner: false,
       theme: initTheme,
-      home: MyApp(),
+      home: FeelMeRoot(currentUser),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class FeelMeRoot extends StatelessWidget {
+  final GuruUser? user;
+  const FeelMeRoot(this.user);
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -62,9 +68,14 @@ class MyApp extends StatelessWidget {
             return [];
           },
           create: (_) => getSigns(),
-        )
+        ),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(
+            currentUser: user,
+          ),
+        ),
       ],
-      child: const LandingPage(),
+      child: user == null ? const LandingPage() : MoviesScreen(),
     );
   }
 }
