@@ -2,7 +2,7 @@
     package="gr.esentis.feelm">
    <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="feelm"
+        android:label="Feelm Movie Guru"
         android:icon="@mipmap/ic_launcher">
         
         <meta-data android:name="com.facebook.sdk.ApplicationId"
