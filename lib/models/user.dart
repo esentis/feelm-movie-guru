@@ -8,11 +8,13 @@ var users = kFirestore.collection('users');
 extension UserExtensions on User? {
   Future<GuruUser> toGuruUser() async {
     if (this != null) {
-      return users.where('email', isEqualTo: this!.email).get().then(
+      await users.where('email', isEqualTo: this!.email).get().then(
         (qs) {
-          var user = GuruUser.fromMap(qs.docs.first.data()!);
-          kLog.wtf('${user.email} is logged in.');
-          return GuruUser.fromMap(qs.docs.first.data()!);
+          if (qs.docs.isNotEmpty) {
+            var user = GuruUser.fromMap(qs.docs.first.data()!);
+            kLog.wtf('${user.email} is logged in.');
+            return GuruUser.fromMap(qs.docs.first.data()!);
+          }
         },
       );
     }
@@ -62,6 +64,15 @@ Future<bool> checkMail(String? email) async {
   });
 
   return exists;
+}
+
+Future<GuruUser?> getGuruUser(String email) async {
+  GuruUser? user;
+  await users.where('email', isEqualTo: email).get().then((qs) {
+    user = GuruUser.fromMap(qs.docs.first.data()!);
+  });
+
+  return user;
 }
 
 void createUser(GuruUser user) {
