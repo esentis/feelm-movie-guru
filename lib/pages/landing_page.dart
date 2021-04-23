@@ -6,6 +6,7 @@ import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/movies_screen.dart';
 import 'package:feelm/theme_config.dart';
+import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -43,15 +44,41 @@ class _LandingPageState extends State<LandingPage>
   Future<String> showPickerDate(BuildContext context) async {
     var sign = '';
     await Picker(
-        hideHeader: true,
-        adapter: DateTimePickerAdapter(),
-        title: const Text('Select Data'),
-        selectedTextStyle: const TextStyle(color: Colors.blue),
-        onConfirm: (Picker picker, List value) {
-          var date = (picker.adapter as DateTimePickerAdapter).value;
-          kLog.wtf(getSign(date!));
-          sign = getSign(date);
-        }).showDialog(context);
+      backgroundColor: Colors.transparent,
+      height: 150,
+      hideHeader: true,
+      adapter: DateTimePickerAdapter(),
+      title: Text(
+        'Birthdate',
+        style: kStyleLight.copyWith(
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+          color: kColorMain,
+        ),
+      ),
+      textStyle: kStyleLight.copyWith(
+        color: Theme.of(context).errorColor,
+      ),
+      cancelTextStyle: kStyleLight.copyWith(
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+        color: Colors.red,
+      ),
+      confirmTextStyle: kStyleLight.copyWith(
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+        color: kColorMain,
+      ),
+      selectedTextStyle: kStyleLight.copyWith(
+        fontWeight: FontWeight.bold,
+        color: kColorMain,
+      ),
+      onConfirm: (Picker picker, List value) {
+        var date = (picker.adapter as DateTimePickerAdapter).value;
+        kLog.wtf(getSign(date!));
+        sign = getSign(date);
+      },
+    ).showDialog(context);
     return sign;
   }
 
@@ -63,8 +90,9 @@ class _LandingPageState extends State<LandingPage>
       vsync: this,
       duration: 900.milliseconds,
     );
+    WidgetsBinding.instance!
+        .addPostFrameCallback((_) => Get.changeTheme(lightTheme));
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
@@ -153,7 +181,12 @@ class _LandingPageState extends State<LandingPage>
                     height: 60,
                     controller: themeController,
                     onLoaded: (composition) {
-                      themeController?.animateTo(1);
+                      kLog.wtf(lightTheme);
+                      kLog.wtf(Get.isDarkMode);
+                      kLog.wtf('${Get.theme == lightTheme}');
+                      Get.theme == lightTheme
+                          ? themeController?.animateTo(0.5)
+                          : themeController?.animateTo(0);
                     },
                   ),
                 ),
@@ -264,40 +297,54 @@ class _LandingPageState extends State<LandingPage>
                                                         await Get.offAll(() =>
                                                             MoviesScreen());
                                                       } on FirebaseAuthException catch (e) {
-                                                        Get.snackbar('Error',
-                                                            e.message!);
-                                                        kLog.e(e);
+                                                        feelmSnackbar(
+                                                          status.ERROR,
+                                                          'Error',
+                                                          e.message!,
+                                                        );
                                                       }
                                                     } else {
                                                       try {
-                                                        var userCredential = await kAuth
-                                                            .createUserWithEmailAndPassword(
-                                                                email:
-                                                                    _emailController
-                                                                        .text,
-                                                                password:
-                                                                    _passwordController
-                                                                        .text);
                                                         var sign =
                                                             await showPickerDate(
                                                                 context);
-                                                        createUser(
-                                                          GuruUser(
-                                                            email:
-                                                                userCredential
-                                                                    .user
-                                                                    ?.email,
-                                                            joinDate:
-                                                                DateTime.now(),
-                                                            zodiacSign: sign,
-                                                          ),
-                                                        );
-                                                        await Get.offAll(() =>
-                                                            MoviesScreen());
+                                                        if (sign.isNotEmpty) {
+                                                          var userCredential = await kAuth
+                                                              .createUserWithEmailAndPassword(
+                                                                  email:
+                                                                      _emailController
+                                                                          .text,
+                                                                  password:
+                                                                      _passwordController
+                                                                          .text);
+                                                          createUser(
+                                                            GuruUser(
+                                                              email:
+                                                                  userCredential
+                                                                      .user!
+                                                                      .email,
+                                                              zodiacSign: sign,
+                                                              joinDate: DateTime
+                                                                  .now(),
+                                                            ),
+                                                          );
+                                                          await Get.offAll(
+                                                            () =>
+                                                                MoviesScreen(),
+                                                          );
+                                                        } else {
+                                                          feelmSnackbar(
+                                                            status.INFO,
+                                                            'Registration cancelled',
+                                                            'You must choose your birthdate.',
+                                                          );
+                                                        }
                                                       } on FirebaseAuthException catch (e) {
-                                                        Get.snackbar('Error',
-                                                            e.message!);
-                                                        kLog.e(e);
+                                                        feelmSnackbar(
+                                                          status.ERROR,
+                                                          'Error',
+                                                          e.message!,
+                                                        );
                                                       }
                                                     }
                                                   },
@@ -389,45 +436,40 @@ class _LandingPageState extends State<LandingPage>
                                     Flexible(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          kLog.wtf(
-                                              'Total keywords ${words.length}');
-                                          kLog.wtf(
-                                              'Total Zodiac Signs ${signs[1].keywords.length}');
                                           var user = await signInWithFacebook();
-                                          if (await checkMail(
-                                              user!.user!.email)) {
-                                            kLog.i(
-                                                '${user.user!.email} is not a user');
-                                            var sign =
-                                                await showPickerDate(context);
-                                            createUser(
-                                              GuruUser(
-                                                email: user.user!.email,
-                                                zodiacSign: sign,
-                                                joinDate: DateTime.now(),
-                                              ),
+                                          if (user != null) {
+                                            if (await checkMail(
+                                                user.user!.email)) {
+                                              kLog.i(
+                                                  '${user.user!.email} is not a user');
+                                              var sign =
+                                                  await showPickerDate(context);
+                                              if (sign.isNotEmpty) {
+                                                createUser(
+                                                  GuruUser(
+                                                    email: user.user!.email,
+                                                    zodiacSign: sign,
+                                                    joinDate: DateTime.now(),
+                                                  ),
+                                                );
+                                                await Get.offAll(
+                                                  () => MoviesScreen(),
+                                                );
+                                              } else {
+                                                feelmSnackbar(
+                                                  status.INFO,
+                                                  'Registration cancelled',
+                                                  'You must choose your birthdate.',
+                                                );
+                                              }
+                                            }
+                                          } else {
+                                            feelmSnackbar(
+                                              status.ERROR,
+                                              'Cancelled',
+                                              'Facebook login cancelled.',
                                             );
-                                            await Get.offAll(
-                                                () => MoviesScreen());
                                           }
-                                          // var x = await getKeywords('interview');
-                                          // var keywordIds = List.generate(
-                                          //   x.keywords.length,
-                                          //   (index) => x.keywords[index].id.toString(),
-                                          // );
-
-                                          // kLog.wtf(
-                                          //   List.generate(x.keywords.length,
-                                          //       (index) => x.keywords[index].name),
-                                          // );
-
-                                          // // var stringKeywords = keywordIds.join(',');
-                                          // // kLog.wtf(stringKeywords);
-                                          // var z = await discoverMovies(keywordIds.last);
-                                          // kLog.wtf(
-                                          //   List.generate(
-                                          //       z.length, (index) => z[index].title),
-                                          // );
                                         },
                                         child: Icon(
                                           Elusive.facebook,
@@ -443,21 +485,42 @@ class _LandingPageState extends State<LandingPage>
                                       child: GestureDetector(
                                         onTap: () async {
                                           var user = await googleSign();
-                                          if (await checkMail(
-                                              user!.user!.email)) {
-                                            kLog.i(
-                                                '${user.user!.email} is not a user');
-                                            var sign =
-                                                await showPickerDate(context);
-                                            createUser(
-                                              GuruUser(
-                                                email: user.user!.email,
-                                                zodiacSign: sign,
-                                                joinDate: DateTime.now(),
-                                              ),
+                                          if (user != null) {
+                                            if (await checkMail(
+                                                user.user!.email)) {
+                                              kLog.i(
+                                                  '${user.user!.email} is not a user');
+                                              var sign =
+                                                  await showPickerDate(context);
+                                              if (sign.isNotEmpty) {
+                                                createUser(
+                                                  GuruUser(
+                                                    email: user.user!.email,
+                                                    zodiacSign: sign,
+                                                    joinDate: DateTime.now(),
+                                                  ),
+                                                );
+                                                await Get.offAll(
+                                                  () => MoviesScreen(),
+                                                );
+                                              } else {
+                                                feelmSnackbar(
+                                                  status.INFO,
+                                                  'Registration cancelled',
+                                                  'You must choose your birthdate.',
+                                                );
+                                              }
+                                            } else {
+                                              await Get.offAll(
+                                                () => MoviesScreen(),
+                                              );
+                                            }
+                                          } else {
+                                            feelmSnackbar(
+                                              status.INFO,
+                                              'Cancelled',
+                                              'Google login cancelled.',
                                             );
-                                            await Get.offAll(
-                                                () => MoviesScreen());
                                           }
                                         },
                                         child: Icon(
