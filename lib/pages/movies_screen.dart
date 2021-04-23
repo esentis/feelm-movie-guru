@@ -1,23 +1,24 @@
 import 'dart:math';
 
+import 'package:date_format/date_format.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
-import 'package:feelm/models/movie.dart';
 import 'package:feelm/models/sign.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
+import 'package:feelm/pages/movie_details_screen.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttericon/iconic_icons.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class MoviesScreen extends StatefulWidget {
   @override
@@ -33,7 +34,7 @@ class _MoviesScreenState extends State<MoviesScreen>
   late List<ZodiacSign> signs;
   late GuruUser? currentGuruUser;
   late ZodiacSign usersSign;
-  List<Movie> recommendedMovies = [];
+  List<dynamic> recommendedMovies = ['', ''];
   int page = 1;
 
   final ScrollController _movieScrollController = ScrollController();
@@ -47,33 +48,19 @@ class _MoviesScreenState extends State<MoviesScreen>
     if (firstStart) {
       signs = await getSigns();
       currentGuruUser = await getGuruUser(kAuth.currentUser!.email!);
-      kLog.wtf('User\s zodiac sign is ${currentGuruUser?.zodiacSign}');
       usersSign = signs
           .firstWhere((element) => element.name == currentGuruUser?.zodiacSign);
-      kLog.wtf('Final sign is ${usersSign.name}');
 
       var keywordIds = List.generate(
         usersSign.keywords.length,
         (index) => usersSign.keywords[index].id.toString(),
       );
-
-      kLog.wtf(
-        List.generate(usersSign.keywords.length,
-            (index) => usersSign.keywords[index].name),
-      );
-
       concatKeywords = keywordIds.join('|');
-      kLog.wtf(concatKeywords);
       recommendedMovies = await discoverMovies(concatKeywords, page: page);
-      kLog.wtf(
-        List.generate(recommendedMovies.length,
-            (index) => recommendedMovies[index].title),
-      );
       feelmSnackbar(status.SUCCESS, 'Welcome back', kAuth.currentUser!.email!);
       setState(() {});
     } else {
       recommendedMovies = [];
-      kLog.wtf('Looking for $concatKeywords at page $page');
       recommendedMovies = await discoverMovies(concatKeywords, page: page);
       setState(() {});
     }
@@ -115,7 +102,9 @@ class _MoviesScreenState extends State<MoviesScreen>
           // A smooth color layer at top of the background image
           Positioned.fill(
             child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
+              color: Get.theme.brightness == Brightness.dark
+                  ? Colors.black.withOpacity(0.8)
+                  : Colors.white.withOpacity(0.8),
             ),
           ),
           Positioned(
@@ -123,7 +112,8 @@ class _MoviesScreenState extends State<MoviesScreen>
             right: 0,
             child: GestureDetector(
               onTap: () {
-                if (themeController?.value == 0.5) {
+                kLog.wtf(Get.theme.brightness);
+                if (Get.theme.brightness == Brightness.dark) {
                   themeController?.animateTo(0);
                   Get.changeTheme(lightTheme);
                 } else {
@@ -137,7 +127,7 @@ class _MoviesScreenState extends State<MoviesScreen>
                 height: 60,
                 controller: themeController,
                 onLoaded: (composition) {
-                  Get.theme == lightTheme
+                  Get.theme.brightness == Brightness.light
                       ? themeController?.animateTo(0.5)
                       : themeController?.animateTo(0);
                 },
@@ -167,49 +157,105 @@ class _MoviesScreenState extends State<MoviesScreen>
             bottom: 0,
             child: Column(
               children: [
-                IconButton(
-                    onPressed: () async {
-                      kLog.wtf('Getting next page results');
-                      page++;
-                      await _movieScrollController.animateTo(0,
-                          duration: 500.milliseconds, curve: Curves.easeIn);
-                      await checkUser();
-                    },
-                    icon: Icon(Iconic.ok)),
+                Text(
+                  'Total pages ${recommendedMovies[1]}',
+                  style: kStyleLight,
+                ),
+                Text(
+                  'Current page $page',
+                  style: kStyleLight.copyWith(
+                    fontSize: 16,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: page <= 1
+                          ? null
+                          : () async {
+                              kLog.wtf('Getting next page results');
+                              page--;
+                              await _movieScrollController.animateTo(0,
+                                  duration: 500.milliseconds,
+                                  curve: Curves.easeIn);
+                              await checkUser();
+                            },
+                      child: Text(
+                        'Previous',
+                        style: kStyleLight.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        page++;
+                        await _movieScrollController.animateTo(0,
+                            duration: 500.milliseconds, curve: Curves.easeIn);
+                        await checkUser();
+                      },
+                      child: Text(
+                        'Next',
+                        style: kStyleLight.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          topLeft: Radius.circular(20),
-                        )),
+                      color: Get.theme.brightness == Brightness.light
+                          ? Colors.white
+                          : Colors.black,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(20),
+                        topLeft: Radius.circular(20),
+                      ),
+                    ),
                     child: ListView.builder(
                       controller: _movieScrollController,
-                      itemCount: recommendedMovies.length,
+                      itemCount: recommendedMovies[0].length,
                       itemBuilder: (context, index) => ListTile(
+                        onTap: () async {
+                          context.loaderOverlay.show();
+                          var videos =
+                              await getVideos(recommendedMovies[0][index].id!);
+                          await Get.to(
+                            () => MovieDetailsScreen(
+                              movie: recommendedMovies[0][index],
+                              videos: videos!,
+                            ),
+                          );
+                          context.loaderOverlay.hide();
+                        },
                         title: Text(
-                          recommendedMovies[index].title!,
+                          recommendedMovies[0][index].title!,
                           style: kStyleLight.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 17,
                           ),
                         ),
                         subtitle: Text(
-                          '${recommendedMovies[index].releaseDate!.day}-${recommendedMovies[index].releaseDate!.month}-${recommendedMovies[index].releaseDate!.year}',
+                          formatDate(recommendedMovies[0][index].releaseDate,
+                              [d, ' ', MM, ' ', yyyy]),
                           style: kStyleLight.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontSize: 17,
+                            fontSize: 14,
                           ),
                         ),
-                        leading: recommendedMovies[index].posterPath == null
+                        leading: recommendedMovies[0][index].posterPath == null
                             ? Image.network(
                                 'https://i.imgur.com/ajjPdCO.png',
                                 width: 40,
                                 height: 120,
                               )
                             : Image.network(baseImgUrl +
-                                recommendedMovies[index].posterPath!),
+                                recommendedMovies[0][index].posterPath!),
                       ),
                     ),
                   ),
