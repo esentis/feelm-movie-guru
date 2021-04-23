@@ -1,9 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feelm/models/keyword.dart';
+import 'package:feelm/models/sign.dart';
+import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
+import 'package:feelm/models/user.dart';
+
+String baseImgUrl = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2';
 
 FirebaseFirestore kFirestore = FirebaseFirestore.instance;
 var kLog = Logger();
@@ -117,3 +124,27 @@ String getSign(DateTime birthDate) {
   }
   return 'ok';
 }
+
+var kProviders = [
+  FutureProvider<List<Keyword>>(
+    initialData: [],
+    catchError: (context, x) {
+      kLog.e(x);
+      return [];
+    },
+    create: (_) => getKeywords(),
+  ),
+  FutureProvider<List<ZodiacSign>>(
+    initialData: [],
+    catchError: (context, x) {
+      kLog.e(x);
+      return [];
+    },
+    create: (_) => getSigns(),
+  ),
+  ChangeNotifierProvider<UserProvider>(
+    create: (_) => UserProvider(
+      currentUser: GuruUser(),
+    ),
+  ),
+];

@@ -1,11 +1,8 @@
 import 'dart:ui';
 import 'package:feelm/constants.dart';
-import 'package:feelm/models/keyword.dart';
-import 'package:feelm/models/sign.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movies_screen.dart';
-import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/theme_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -32,15 +29,11 @@ void main() async {
       version: 'v9.0',
     );
   }
-  var isPlatformDark =
-      WidgetsBinding.instance!.window.platformBrightness == Brightness.dark;
-
-  var initTheme = isPlatformDark ? darkTheme : lightTheme;
   runApp(
     GetMaterialApp(
       title: 'Feelm Movie Guru',
       debugShowCheckedModeBanner: false,
-      theme: initTheme,
+      theme: lightTheme,
       home: FeelMeRoot(currentUser),
     ),
   );
@@ -52,29 +45,7 @@ class FeelMeRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        FutureProvider<List<Keyword>>(
-          initialData: [],
-          catchError: (context, x) {
-            kLog.e(x);
-            return [];
-          },
-          create: (_) => getKeywords(),
-        ),
-        FutureProvider<List<ZodiacSign>>(
-          initialData: [],
-          catchError: (context, x) {
-            kLog.e(x);
-            return [];
-          },
-          create: (_) => getSigns(),
-        ),
-        ChangeNotifierProvider<UserProvider>(
-          create: (_) => UserProvider(
-            currentUser: user,
-          ),
-        ),
-      ],
+      providers: kProviders,
       child: user == null ? const LandingPage() : MoviesScreen(),
     );
   }
