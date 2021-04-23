@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:feelm/constants.dart';
-import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/movies_screen.dart';
 import 'package:feelm/theme_config.dart';
@@ -90,14 +89,13 @@ class _LandingPageState extends State<LandingPage>
       vsync: this,
       duration: 900.milliseconds,
     );
-    WidgetsBinding.instance!
-        .addPostFrameCallback((_) => Get.changeTheme(lightTheme));
+    kLog.wtf(Get.theme.brightness);
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    var words = Provider.of<List<Keyword>>(context);
     var signs = Provider.of<List<ZodiacSign>>(context);
 
     signs.sort((a, b) =>
@@ -123,7 +121,9 @@ class _LandingPageState extends State<LandingPage>
           // A smooth color layer at top of the background image
           Positioned.fill(
             child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
+              color: Get.theme.brightness == Brightness.dark
+                  ? Colors.black.withOpacity(0.8)
+                  : Colors.white.withOpacity(0.8),
             ),
           ),
 
@@ -134,6 +134,7 @@ class _LandingPageState extends State<LandingPage>
                 left: 70,
                 right: 70,
                 child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
                       sigmaX: 5,
@@ -145,7 +146,7 @@ class _LandingPageState extends State<LandingPage>
                       duration: 200.milliseconds,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Get.theme == darkTheme
+                          color: Get.theme.brightness == Brightness.dark
                               ? Colors.black.withOpacity(0.3)
                               : Colors.white.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(30),
@@ -167,24 +168,25 @@ class _LandingPageState extends State<LandingPage>
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    if (themeController?.value == 0.5) {
+                    kLog.wtf(Get.theme.brightness);
+                    if (Get.theme.brightness == Brightness.dark) {
+                      kLog.wtf('Changing theme to light');
                       themeController?.animateTo(0);
-                      Get.changeTheme(lightTheme);
+                      Get.changeTheme(ThemeData.light());
                     } else {
+                      kLog.wtf('Changing theme to dark');
                       themeController?.animateTo(0.5);
-                      Get.changeTheme(darkTheme);
+                      Get.changeTheme(ThemeData.dark());
                     }
-                    kLog.wtf(themeController?.value);
+
+                    setState(() {});
                   },
                   child: Lottie.asset(
                     'assets/theme_switcher.json',
                     height: 60,
                     controller: themeController,
                     onLoaded: (composition) {
-                      kLog.wtf(lightTheme);
-                      kLog.wtf(Get.isDarkMode);
-                      kLog.wtf('${Get.theme == lightTheme}');
-                      Get.theme == lightTheme
+                      Get.theme.brightness == Brightness.light
                           ? themeController?.animateTo(0.5)
                           : themeController?.animateTo(0);
                     },

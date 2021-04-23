@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movies_screen.dart';
-import 'package:feelm/theme_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -33,8 +32,14 @@ void main() async {
     GetMaterialApp(
       title: 'Feelm Movie Guru',
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      home: FeelMeRoot(currentUser),
+      theme: ThemeData.light(),
+      home: LoaderOverlay(
+        useDefaultLoading: false,
+        overlayWidget: Center(
+          child: kSpinkit,
+        ),
+        child: FeelMeRoot(currentUser),
+      ),
     ),
   );
 }
