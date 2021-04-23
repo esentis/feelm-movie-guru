@@ -3,7 +3,6 @@
 //     final movie = movieFromMap(jsonString);
 
 import 'dart:convert';
-
 import 'package:feelm/models/cast.dart';
 import 'package:feelm/models/country.dart';
 import 'package:feelm/models/genre.dart';
@@ -47,29 +46,33 @@ class Movie {
   bool? video;
   double? voteAverage;
 
-  factory Movie.fromMap(Map<String, dynamic> json) => Movie(
-        posterPath: json['poster_path'],
-        adult: json['adult'],
-        overview: json['overview'],
-        releaseDate: DateTime.parse(json['release_date']),
-        genreIds: List<int>.from(json['genre_ids'].map((x) => x)),
-        id: json['id'],
-        originalTitle: json['original_title'],
-        originalLanguage: json['original_language'],
-        title: json['title'],
-        backdropPath: json['backdrop_path'],
-        popularity: json['popularity'].toDouble(),
-        voteCount: json['vote_count'],
-        video: json['video'],
-        voteAverage: json['vote_average'].toDouble(),
-      );
+  factory Movie.fromMap(Map<String, dynamic> json) {
+    return Movie(
+      posterPath: json['poster_path'],
+      adult: json['adult'],
+      overview: json['overview'],
+      releaseDate: json['release_date'].isEmpty
+          ? DateTime.now()
+          : DateTime.parse(json['release_date']),
+      genreIds: List<int>.from(json['genre_ids'].map((x) => x)),
+      id: json['id'],
+      originalTitle: json['original_title'],
+      originalLanguage: json['original_language'],
+      title: json['title'],
+      backdropPath: json['backdrop_path'],
+      popularity: json['popularity'].toDouble(),
+      voteCount: json['vote_count'],
+      video: json['video'],
+      voteAverage: json['vote_average'].toDouble(),
+    );
+  }
 
   Map<String, dynamic> toMap() => {
         'poster_path': posterPath,
         'adult': adult,
         'overview': overview,
         'release_date':
-            "${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}",
+            '${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}',
         'genre_ids': List<dynamic>.from(genreIds!.map((x) => x)),
         'id': id,
         'original_title': originalTitle,
@@ -219,7 +222,7 @@ class MovieDetailed {
         'production_countries':
             List<dynamic>.from(productionCountries!.map((x) => x.toMap())),
         'release_date':
-            "${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}",
+            '${releaseDate!.year.toString().padLeft(4, '0')}-${releaseDate!.month.toString().padLeft(2, '0')}-${releaseDate!.day.toString().padLeft(2, '0')}',
         'revenue': revenue,
         'runtime': runtime,
         'spoken_languages':
@@ -254,5 +257,65 @@ class MovieCredits {
         'id': id,
         'cast': List<dynamic>.from(cast!.map((x) => x.toMap())),
         'crew': List<dynamic>.from(crew!.map((x) => x.toMap())),
+      };
+}
+
+class MovieVideos {
+  MovieVideos({
+    required this.id,
+    required this.results,
+  });
+
+  int id;
+  List<Video> results;
+
+  factory MovieVideos.fromJson(Map<String, dynamic> json) => MovieVideos(
+        id: json['id'],
+        results:
+            List<Video>.from(json['results'].map((x) => Video.fromJson(x))),
+      );
+}
+
+class Video {
+  Video({
+    required this.id,
+    required this.iso6391,
+    required this.iso31661,
+    required this.key,
+    required this.name,
+    required this.site,
+    required this.size,
+    required this.type,
+  });
+
+  String id;
+  String iso6391;
+  String iso31661;
+  String key;
+  String name;
+  String site;
+  int size;
+  String type;
+
+  factory Video.fromJson(Map<String, dynamic> json) => Video(
+        id: json['id'],
+        iso6391: json['iso_639_1'],
+        iso31661: json['iso_3166_1'],
+        key: json['key'],
+        name: json['name'],
+        site: json['site'],
+        size: json['size'],
+        type: json['type'],
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'iso_639_1': iso6391,
+        'iso_3166_1': iso31661,
+        'key': key,
+        'name': name,
+        'site': site,
+        'size': size,
+        'type': type,
       };
 }
