@@ -152,7 +152,7 @@ Future<KeywordResults> getKeywords(String term) async {
 /// getKeywords(String term)
 /// ```
 /// which returns a list of keywords used by movies.
-Future<List<Movie>> discoverMovies(String keywords, {int page = 1}) async {
+Future<List<dynamic>> discoverMovies(String keywords, {int page = 1}) async {
   try {
     var response = await tmdb.get(
       '/3/discover/movie',
@@ -160,15 +160,45 @@ Future<List<Movie>> discoverMovies(String keywords, {int page = 1}) async {
         'api_key': env['TMDB_KEY'],
         'with_keywords': keywords,
         'page': page,
+        'language': 'el-GR',
       },
     );
     var discoveredMovies = <Movie>[];
-    response.data['results'].forEach((jsonMovie) {
-      discoveredMovies.add(Movie.fromMap(jsonMovie));
-    });
-    return discoveredMovies;
+    response.data['results'].forEach(
+      (jsonMovie) {
+        discoveredMovies.add(Movie.fromMap(jsonMovie));
+      },
+    );
+    return List<dynamic>.generate(
+        2,
+        (index) =>
+            index == 0 ? discoveredMovies : response.data['total_pages']);
   } on DioError catch (e) {
     kLog.e(e.message);
     return [];
+  }
+}
+
+/// Discover movies with [keywords]. [keywords] is a string with concatinated Keyword ids.
+///
+/// Keyword ids can be created by searching keywords with:
+/// ```dart
+/// getKeywords(String term)
+/// ```
+/// which returns a list of keywords used by movies.
+Future<MovieVideos?> getVideos(int id) async {
+  try {
+    var response = await tmdb.get(
+      '/3/movie/$id/videos',
+      queryParameters: {
+        'api_key': env['TMDB_KEY'],
+        'language': 'el-GR',
+      },
+    );
+
+    return MovieVideos.fromJson(response.data);
+  } on DioError catch (e) {
+    kLog.e(e.message);
+    return null;
   }
 }
