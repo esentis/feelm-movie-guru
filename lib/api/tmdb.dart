@@ -152,13 +152,14 @@ Future<KeywordResults> getKeywords(String term) async {
 /// getKeywords(String term)
 /// ```
 /// which returns a list of keywords used by movies.
-Future<List<Movie>> discoverMovies(String keywords) async {
+Future<List<Movie>> discoverMovies(String keywords, {int page = 1}) async {
   try {
     var response = await tmdb.get(
       '/3/discover/movie',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
         'with_keywords': keywords,
+        'page': page,
       },
     );
     var discoveredMovies = <Movie>[];
