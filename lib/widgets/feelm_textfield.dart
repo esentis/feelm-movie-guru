@@ -1,5 +1,4 @@
 import 'package:feelm/constants.dart';
-import 'package:feelm/theme_config.dart';
 import 'package:flutter/material.dart';
 
 class FeelmTextField extends StatelessWidget {
@@ -22,13 +21,13 @@ class FeelmTextField extends StatelessWidget {
       controller: controller,
       textAlign: TextAlign.center,
       style: kStyleLight.copyWith(
-        color: Theme.of(context).errorColor,
+        color: kColorGrey,
       ),
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(60),
           borderSide: BorderSide(
-            color: purpleDark,
+            color: kColorMain,
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -36,13 +35,13 @@ class FeelmTextField extends StatelessWidget {
             60,
           ),
           borderSide: BorderSide(
-            color: Theme.of(context).errorColor,
+            color: kColorMain,
             width: 3,
           ),
         ),
         labelText: label,
         labelStyle: kStyleLight.copyWith(
-          color: Theme.of(context).errorColor,
+          color: kColorGrey,
         ),
       ),
     );

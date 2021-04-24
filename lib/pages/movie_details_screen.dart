@@ -4,8 +4,11 @@ import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/movie.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttericon/mfg_labs_icons.dart';
 import 'package:get/get.dart';
+import 'package:share/share.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:supercharged/supercharged.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -44,43 +47,86 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Get.theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+      backgroundColor: Colors.black,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.black,
             toolbarHeight: 250,
             expandedHeight: 450,
+            leading: IconButton(
+              onPressed: Get.back,
+              icon: Icon(
+                MfgLabs.left_fat,
+                color: kColorMain,
+                size: 35,
+              ),
+            ),
+            actions: [
+              IconButton(
+                // ${baseImgUrl + widget.movie.posterPath!}
+                onPressed: () async {
+                  await Share.share(
+                    widget.movie.overview!.isEmpty
+                        ? 'Δεν υπάρχει περιγραφη της ταινίας'
+                        : '${widget.movie.overview!} ${baseImgUrl + widget.movie.posterPath!}',
+                    subject:
+                        '${widget.movie.title!} - ${formatDate(widget.movie.releaseDate!, [
+                      d,
+                      ' ',
+                      MM,
+                      ' ',
+                      yyyy
+                    ])}',
+                  );
+                },
+                icon: Icon(
+                  MfgLabs.link,
+                  color: kColorMain,
+                  size: 35,
+                ),
+              )
+            ],
             pinned: false,
             floating: true,
             flexibleSpace: Stack(
               children: [
                 Positioned.fill(
-                  child: ExtendedImage.network(
-                    baseImgUrl + widget.movie.posterPath!,
-                    cache: true,
-                    fit: BoxFit.cover,
-                    enableLoadState: true,
-                    // ignore: missing_return
-                    loadStateChanged: (state) {
-                      if (state.extendedImageLoadState == LoadState.loading) {
-                        return kSpinkit;
-                      }
-                    },
-                  ),
+                  child: widget.movie.posterPath == null
+                      ? ExtendedImage.network(
+                          'https://i.imgur.com/ajjPdCO.png',
+                          width: 40,
+                          height: 120,
+                          loadStateChanged: (state) {
+                            if (state.extendedImageLoadState ==
+                                LoadState.loading) {
+                              return kSpinkit;
+                            }
+                          },
+                        )
+                      : ExtendedImage.network(
+                          baseImgUrl + widget.movie.posterPath!,
+                          cache: true,
+                          fit: BoxFit.cover,
+                          enableLoadState: true,
+                          // ignore: missing_return
+                          loadStateChanged: (state) {
+                            if (state.extendedImageLoadState ==
+                                LoadState.loading) {
+                              return kSpinkit;
+                            }
+                          },
+                        ),
                 ),
                 Positioned.fill(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Get.theme.brightness == Brightness.dark
-                              ? Colors.black
-                              : Colors.white,
+                          Colors.black,
                           Colors.transparent,
                         ],
                       ),
@@ -98,7 +144,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         style: kStyleLight.copyWith(
                           fontSize: 21,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: 'ffc93c'.toColor(),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -108,7 +154,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               style: kStyleLight.copyWith(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                                color: 'ffc93c'.toColor(),
                               ),
                               textAlign: TextAlign.center,
                             )
@@ -119,7 +165,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         style: kStyleLight.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: kColorGrey,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -140,9 +186,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         // ignore: unnecessary_string_interpolations
                         widget.movie.overview!,
                         style: kStyleLight.copyWith(
-                          color: Get.theme.brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
+                          color: kColorGrey,
                         ),
                         textAlign: TextAlign.center,
                       ),
