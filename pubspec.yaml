@@ -43,6 +43,7 @@ dependencies:
   lottie: ^1.0.1
   pedantic: ^1.11.0
   provider: ^5.0.0
+  share: ^2.0.1
   simple_animations: ^3.0.2
   supercharged: ^2.0.0
   youtube_player_flutter: ^8.0.0
