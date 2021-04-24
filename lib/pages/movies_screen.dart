@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:date_format/date_format.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
@@ -9,12 +11,9 @@ import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movie_details_screen.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
-import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
@@ -102,36 +101,7 @@ class _MoviesScreenState extends State<MoviesScreen>
           // A smooth color layer at top of the background image
           Positioned.fill(
             child: Container(
-              color: Get.theme.brightness == Brightness.dark
-                  ? Colors.black.withOpacity(0.8)
-                  : Colors.white.withOpacity(0.8),
-            ),
-          ),
-          Positioned(
-            top: 25,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                kLog.wtf(Get.theme.brightness);
-                if (Get.theme.brightness == Brightness.dark) {
-                  themeController?.animateTo(0);
-                  Get.changeTheme(lightTheme);
-                } else {
-                  themeController?.animateTo(0.5);
-                  Get.changeTheme(darkTheme);
-                }
-                kLog.wtf(themeController?.value);
-              },
-              child: Lottie.asset(
-                'assets/theme_switcher.json',
-                height: 60,
-                controller: themeController,
-                onLoaded: (composition) {
-                  Get.theme.brightness == Brightness.light
-                      ? themeController?.animateTo(0.5)
-                      : themeController?.animateTo(0);
-                },
-              ),
+              color: Colors.black.withOpacity(0.8),
             ),
           ),
           Positioned(
@@ -141,30 +111,34 @@ class _MoviesScreenState extends State<MoviesScreen>
               onTap: () async {
                 await kAuth.signOut();
                 await Get.offAll(
-                  () => MultiProvider(
-                    providers: kProviders,
-                    child: const LandingPage(),
-                  ),
+                  () => const LandingPage(),
                 );
               },
-              child: const Icon(MfgLabs.logout),
+              child: Icon(
+                MfgLabs.logout,
+                color: kColorMain,
+                size: 35,
+              ),
             ),
           ),
           Positioned(
             top: 80,
-            right: 10,
-            left: 10,
+            right: 0,
+            left: 0,
             bottom: 0,
             child: Column(
               children: [
                 Text(
                   'Total pages ${recommendedMovies[1]}',
-                  style: kStyleLight,
+                  style: kStyleLight.copyWith(
+                    color: kColorMain,
+                  ),
                 ),
                 Text(
                   'Current page $page',
                   style: kStyleLight.copyWith(
                     fontSize: 16,
+                    color: kColorMain,
                   ),
                 ),
                 Row(
@@ -185,6 +159,9 @@ class _MoviesScreenState extends State<MoviesScreen>
                         'Previous',
                         style: kStyleLight.copyWith(
                           fontSize: 16,
+                          color: page == 1
+                              ? kColorMain.withOpacity(0.5)
+                              : kColorMain,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -200,6 +177,9 @@ class _MoviesScreenState extends State<MoviesScreen>
                         'Next',
                         style: kStyleLight.copyWith(
                           fontSize: 16,
+                          color: page == recommendedMovies[1]
+                              ? kColorMain.withOpacity(0.5)
+                              : kColorMain,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -207,55 +187,83 @@ class _MoviesScreenState extends State<MoviesScreen>
                   ],
                 ),
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Get.theme.brightness == Brightness.light
-                          ? Colors.white
-                          : Colors.black,
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(20),
-                        topLeft: Radius.circular(20),
+                  child: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 5,
+                        sigmaY: 5,
                       ),
-                    ),
-                    child: ListView.builder(
-                      controller: _movieScrollController,
-                      itemCount: recommendedMovies[0].length,
-                      itemBuilder: (context, index) => ListTile(
-                        onTap: () async {
-                          context.loaderOverlay.show();
-                          var videos =
-                              await getVideos(recommendedMovies[0][index].id!);
-                          await Get.to(
-                            () => MovieDetailsScreen(
-                              movie: recommendedMovies[0][index],
-                              videos: videos!,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: 'ffc93c'.toColor().withOpacity(0.2),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(20),
+                            topLeft: Radius.circular(20),
+                          ),
+                        ),
+                        child: ListView.builder(
+                          controller: _movieScrollController,
+                          itemCount: recommendedMovies[0].length,
+                          itemBuilder: (context, index) => ListTile(
+                            onTap: () async {
+                              context.loaderOverlay.show();
+                              var videos = await getVideos(
+                                  recommendedMovies[0][index].id!);
+                              context.loaderOverlay.hide();
+                              await Get.to(
+                                () => MovieDetailsScreen(
+                                  movie: recommendedMovies[0][index],
+                                  videos: videos!,
+                                ),
+                              );
+                            },
+                            title: Text(
+                              recommendedMovies[0][index].title!,
+                              style: kStyleLight.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: kColorMain,
+                                fontSize: 17,
+                              ),
                             ),
-                          );
-                          context.loaderOverlay.hide();
-                        },
-                        title: Text(
-                          recommendedMovies[0][index].title!,
-                          style: kStyleLight.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17,
+                            subtitle: Text(
+                              formatDate(
+                                  recommendedMovies[0][index].releaseDate,
+                                  [d, ' ', MM, ' ', yyyy]),
+                              style: kStyleLight.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: kColorGrey,
+                                fontSize: 13,
+                              ),
+                            ),
+                            leading: recommendedMovies[0][index].posterPath ==
+                                    null
+                                ? ExtendedImage.network(
+                                    'https://i.imgur.com/ajjPdCO.png',
+                                    width: 40,
+                                    height: 120,
+                                    loadStateChanged: (state) {
+                                      if (state.extendedImageLoadState ==
+                                          LoadState.loading) {
+                                        return kSpinkit;
+                                      }
+                                    },
+                                  )
+                                : ExtendedImage.network(
+                                    baseImgUrl +
+                                        recommendedMovies[0][index].posterPath!,
+                                    borderRadius: BorderRadius.circular(8),
+                                    width: 40,
+                                    height: 120,
+                                    shape: BoxShape.rectangle,
+                                    loadStateChanged: (state) {
+                                      if (state.extendedImageLoadState ==
+                                          LoadState.loading) {
+                                        return kSpinkit;
+                                      }
+                                    },
+                                  ),
                           ),
                         ),
-                        subtitle: Text(
-                          formatDate(recommendedMovies[0][index].releaseDate,
-                              [d, ' ', MM, ' ', yyyy]),
-                          style: kStyleLight.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        leading: recommendedMovies[0][index].posterPath == null
-                            ? Image.network(
-                                'https://i.imgur.com/ajjPdCO.png',
-                                width: 40,
-                                height: 120,
-                              )
-                            : Image.network(baseImgUrl +
-                                recommendedMovies[0][index].posterPath!),
                       ),
                     ),
                   ),

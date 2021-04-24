@@ -11,7 +11,6 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,9 +48,6 @@ class FeelMeRoot extends StatelessWidget {
   const FeelMeRoot(this.user);
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: kProviders,
-      child: user == null ? const LandingPage() : MoviesScreen(),
-    );
+    return user == null ? const LandingPage() : MoviesScreen();
   }
 }

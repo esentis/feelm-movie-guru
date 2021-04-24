@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/movies_screen.dart';
-import 'package:feelm/theme_config.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,11 +12,8 @@ import 'package:flutter_picker/flutter_picker.dart';
 import 'package:fluttericon/elusive_icons.dart';
 import 'package:fluttericon/zocial_icons.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
-import 'package:provider/provider.dart';
-import 'package:feelm/models/sign.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -43,34 +39,40 @@ class _LandingPageState extends State<LandingPage>
   Future<String> showPickerDate(BuildContext context) async {
     var sign = '';
     await Picker(
-      backgroundColor: Colors.transparent,
       height: 150,
       hideHeader: true,
-      adapter: DateTimePickerAdapter(),
+      headerColor: Colors.red,
+      adapter: DateTimePickerAdapter(
+        yearBegin: 1940,
+        yearEnd: 2002,
+      ),
       title: Text(
         'Birthdate',
         style: kStyleLight.copyWith(
           fontWeight: FontWeight.bold,
-          fontSize: 15,
+          fontSize: 20,
           color: kColorMain,
         ),
       ),
       textStyle: kStyleLight.copyWith(
-        color: Theme.of(context).errorColor,
+        color: kColorMain,
+        fontSize: 20,
       ),
+      magnification: 1.3,
       cancelTextStyle: kStyleLight.copyWith(
         fontWeight: FontWeight.bold,
-        fontSize: 15,
+        fontSize: 20,
         color: Colors.red,
       ),
       confirmTextStyle: kStyleLight.copyWith(
         fontWeight: FontWeight.bold,
-        fontSize: 15,
+        fontSize: 20,
         color: kColorMain,
       ),
       selectedTextStyle: kStyleLight.copyWith(
         fontWeight: FontWeight.bold,
         color: kColorMain,
+        fontSize: 20,
       ),
       onConfirm: (Picker picker, List value) {
         var date = (picker.adapter as DateTimePickerAdapter).value;
@@ -96,10 +98,6 @@ class _LandingPageState extends State<LandingPage>
 
   @override
   Widget build(BuildContext context) {
-    var signs = Provider.of<List<ZodiacSign>>(context);
-
-    signs.sort((a, b) =>
-        a.from.millisecondsSinceEpoch.compareTo(b.from.millisecondsSinceEpoch));
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -121,9 +119,7 @@ class _LandingPageState extends State<LandingPage>
           // A smooth color layer at top of the background image
           Positioned.fill(
             child: Container(
-              color: Get.theme.brightness == Brightness.dark
-                  ? Colors.black.withOpacity(0.8)
-                  : Colors.white.withOpacity(0.8),
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
 
@@ -146,9 +142,7 @@ class _LandingPageState extends State<LandingPage>
                       duration: 200.milliseconds,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Get.theme.brightness == Brightness.dark
-                              ? Colors.black.withOpacity(0.3)
-                              : Colors.white.withOpacity(0.3),
+                          color: Colors.black.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Padding(
@@ -160,36 +154,6 @@ class _LandingPageState extends State<LandingPage>
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 25,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    kLog.wtf(Get.theme.brightness);
-                    if (Get.theme.brightness == Brightness.dark) {
-                      kLog.wtf('Changing theme to light');
-                      themeController?.animateTo(0);
-                      Get.changeTheme(ThemeData.light());
-                    } else {
-                      kLog.wtf('Changing theme to dark');
-                      themeController?.animateTo(0.5);
-                      Get.changeTheme(ThemeData.dark());
-                    }
-
-                    setState(() {});
-                  },
-                  child: Lottie.asset(
-                    'assets/theme_switcher.json',
-                    height: 60,
-                    controller: themeController,
-                    onLoaded: (composition) {
-                      Get.theme.brightness == Brightness.light
-                          ? themeController?.animateTo(0.5)
-                          : themeController?.animateTo(0);
-                    },
                   ),
                 ),
               ),
@@ -224,7 +188,8 @@ class _LandingPageState extends State<LandingPage>
                                     ),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: cielLight.withOpacity(0.3),
+                                        color:
+                                            'ffc93c'.toColor().withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(
                                           12,
                                         ),
@@ -392,8 +357,7 @@ class _LandingPageState extends State<LandingPage>
                                                         ? 'Register'
                                                         : 'Login',
                                                     style: kStyleLight.copyWith(
-                                                      color: Theme.of(context)
-                                                          .errorColor,
+                                                      color: kColorGrey,
                                                     ),
                                                   ),
                                                 ),

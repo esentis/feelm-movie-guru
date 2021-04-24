@@ -1,5 +1,6 @@
 import 'package:feelm/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:supercharged/supercharged.dart';
 import 'package:get/get.dart';
 
 enum status {
@@ -13,21 +14,21 @@ void feelmSnackbar(status status, String title, String body) {
     title,
     body,
     backgroundColor: status.index == 0
-        ? Colors.green
+        ? 'ffc93c'.toColor().withOpacity(0.2)
         : status.index == 1
-            ? Colors.red
-            : kColorMain,
+            ? Colors.red.withOpacity(0.2)
+            : kColorMain.withOpacity(0.2),
     titleText: Text(
       title,
       style: kStyleLight.copyWith(
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: kColorMain,
       ),
     ),
     messageText: Text(
       body,
       style: kStyleLight.copyWith(
-        color: Colors.white,
+        color: kColorGrey,
       ),
     ),
   );
