@@ -147,9 +147,12 @@ class _LandingPageState extends State<LandingPage>
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Image.asset(
-                            'assets/logo.png',
-                            height: 100,
+                          child: Hero(
+                            tag: 'logo',
+                            child: Image.asset(
+                              'assets/logo.png',
+                              height: 100,
+                            ),
                           ),
                         ),
                       ),
