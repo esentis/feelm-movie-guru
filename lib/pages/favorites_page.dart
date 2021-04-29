@@ -6,14 +6,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/favorites.dart';
-import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/movie.dart';
-import 'package:feelm/models/sign.dart';
-import 'package:feelm/models/user.dart';
-import 'package:feelm/pages/landing_page.dart';
-import 'package:feelm/pages/movie_details_screen.dart';
-import 'package:feelm/providers/signs_and_keywords.dart';
-import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:simple_animations/simple_animations.dart';
@@ -217,7 +210,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                           favoritedMovies[index].id));
                                 });
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 MfgLabs.heart,
                                 color: Colors.red,
                               ),

@@ -19,11 +19,16 @@ class FeelmTextField extends StatelessWidget {
     return TextField(
       obscureText: isPassword,
       controller: controller,
-      textAlign: TextAlign.center,
       style: kStyleLight.copyWith(
         color: kColorGrey,
+        fontWeight: FontWeight.bold,
+        fontSize: 22,
       ),
       decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 20,
+          horizontal: 20,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(60),
           borderSide: BorderSide(
@@ -42,6 +47,7 @@ class FeelmTextField extends StatelessWidget {
         labelText: label,
         labelStyle: kStyleLight.copyWith(
           color: kColorGrey,
+          fontSize: 20,
         ),
       ),
     );

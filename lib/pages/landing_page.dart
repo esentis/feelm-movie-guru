@@ -194,8 +194,8 @@ class _LandingPageState extends State<LandingPage>
                                           12,
                                         ),
                                       ),
-                                      width: value * 1.1,
-                                      height: value,
+                                      width: value * 1.5,
+                                      height: value * 1.3,
                                       child: AnimatedOpacity(
                                         opacity: value == 200 ? 1 : 0,
                                         duration: 2.seconds,
@@ -428,6 +428,10 @@ class _LandingPageState extends State<LandingPage>
                                                   'You must choose your birthdate.',
                                                 );
                                               }
+                                            } else {
+                                              await Get.offAll(
+                                                () => MoviesScreen(),
+                                              );
                                             }
                                           } else {
                                             feelmSnackbar(

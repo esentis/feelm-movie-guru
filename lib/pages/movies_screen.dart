@@ -5,9 +5,11 @@ import 'package:date_format/date_format.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
+import 'package:feelm/models/favorites.dart';
 import 'package:feelm/models/keyword.dart';
 import 'package:feelm/models/sign.dart';
 import 'package:feelm/models/user.dart';
+import 'package:feelm/pages/favorites_page.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movie_details_screen.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
@@ -24,16 +26,14 @@ class MoviesScreen extends StatefulWidget {
   _MoviesScreenState createState() => _MoviesScreenState();
 }
 
-class _MoviesScreenState extends State<MoviesScreen>
-    with SingleTickerProviderStateMixin {
-  AnimationController? themeController;
-
+class _MoviesScreenState extends State<MoviesScreen> {
   late var random;
   late List<Keyword> words;
   late List<ZodiacSign> signs;
   late GuruUser? currentGuruUser;
   late ZodiacSign usersSign;
   List<dynamic> recommendedMovies = ['', ''];
+  List<Favorite> userFavorites = [];
   int page = 1;
 
   final ScrollController _movieScrollController = ScrollController();
@@ -46,6 +46,7 @@ class _MoviesScreenState extends State<MoviesScreen>
     }
     if (firstStart) {
       signs = await getSigns();
+      userFavorites = await getUserFavorites();
       currentGuruUser = await getGuruUser(kAuth.currentUser!.email!);
       usersSign = signs
           .firstWhere((element) => element.name == currentGuruUser?.zodiacSign);
@@ -65,14 +66,13 @@ class _MoviesScreenState extends State<MoviesScreen>
     }
   }
 
+  Future checkIfFavorited() async {
+    userFavorites = await getUserFavorites();
+  }
+
   @override
   void initState() {
     random = Random().nextInt(10);
-    themeController = AnimationController(
-      vsync: this,
-      duration: 900.milliseconds,
-    );
-
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await checkUser(firstStart: true);
     });
@@ -116,6 +116,24 @@ class _MoviesScreenState extends State<MoviesScreen>
               },
               child: Icon(
                 MfgLabs.logout,
+                color: kColorMain,
+                size: 35,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 25,
+            child: GestureDetector(
+              onTap: () async {
+                await Get.to(
+                  () => FavoritesScreen(
+                    userFavorites: userFavorites,
+                  ),
+                );
+              },
+              child: Icon(
+                MfgLabs.heart,
                 color: kColorMain,
                 size: 35,
               ),
@@ -262,6 +280,26 @@ class _MoviesScreenState extends State<MoviesScreen>
                                       }
                                     },
                                   ),
+                            trailing: IconButton(
+                              onPressed: () async {
+                                await toggleFavorite(
+                                  Favorite(
+                                    email: kAuth.currentUser!.email!,
+                                    movieId: recommendedMovies[0][index].id,
+                                  ),
+                                );
+                                await checkIfFavorited();
+                                setState(() {});
+                              },
+                              icon: Icon(
+                                MfgLabs.heart,
+                                color: userFavorites.any((fav) =>
+                                        fav.movieId ==
+                                        recommendedMovies[0][index].id)
+                                    ? Colors.red
+                                    : Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),

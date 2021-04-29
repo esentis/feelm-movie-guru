@@ -61,20 +61,19 @@ Future searchMovies(String term) async {
 }
 
 /// Returns movies based on [id].
-Future getMovie(int id) async {
+Future<MovieDetailed> getMovies(int id) async {
   Response response;
   try {
     response = await tmdb.get(
       '/3/movie/$id',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
-        'language': 'en-US',
+        'language': 'el-GR',
       },
     );
-    kLog.i('Searching movie with ID : $id.');
   } on DioError catch (e) {
     kLog.e(e);
-    return e.type;
+    return Future.value(null);
   }
   // ignore: omit_local_variable_types
   MovieDetailed detailedMovie = MovieDetailed.fromMap(response.data);
