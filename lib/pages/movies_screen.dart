@@ -7,6 +7,7 @@ import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/favorites.dart';
 import 'package:feelm/models/keyword.dart';
+import 'package:feelm/models/movie.dart';
 import 'package:feelm/models/sign.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/favorites_page.dart';
@@ -16,6 +17,7 @@ import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
@@ -36,7 +38,10 @@ class _MoviesScreenState extends State<MoviesScreen> {
   List<Favorite> userFavorites = [];
   int page = 1;
 
-  final ScrollController _movieScrollController = ScrollController();
+  static const _pageSize = 20;
+
+  final PagingController<int, Movie> _pagingController =
+      PagingController(firstPageKey: 1);
 
   String concatKeywords = '';
 
@@ -70,13 +75,41 @@ class _MoviesScreenState extends State<MoviesScreen> {
     userFavorites = await getUserFavorites();
   }
 
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      // ignore: omit_local_variable_types
+      List<Movie> newItems = await discoverMovies(concatKeywords, page: page);
+      var isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        kLog.w('Got to last page !');
+        _pagingController.appendLastPage(newItems);
+      } else {
+        var nextPageKey = pageKey + newItems.length;
+        _pagingController.appendPage(newItems, nextPageKey);
+        page++;
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
   @override
   void initState() {
     random = Random().nextInt(10);
+    // ignore: unnecessary_lambdas
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await checkUser(firstStart: true);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -134,77 +167,54 @@ class _MoviesScreenState extends State<MoviesScreen> {
               },
               child: Icon(
                 MfgLabs.heart,
-                color: kColorMain,
+                color: Colors.red,
                 size: 35,
               ),
             ),
           ),
           Positioned(
-            top: 80,
+            top: 30,
+            right: 125,
+            left: 125,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 5,
+                  sigmaY: 5,
+                ),
+                child: AnimatedOpacity(
+                  opacity:
+                      MediaQuery.of(context).viewInsets.bottom == 0 ? 1 : 0,
+                  duration: 200.milliseconds,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Hero(
+                        tag: 'logo',
+                        child: Image.asset(
+                          'assets/logo.png',
+                          height: 50,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 120,
             right: 0,
             left: 0,
             bottom: 0,
             child: Column(
               children: [
-                Text(
-                  'Total pages ${recommendedMovies[1]}',
-                  style: kStyleLight.copyWith(
-                    color: kColorMain,
-                  ),
-                ),
-                Text(
-                  'Current page $page',
-                  style: kStyleLight.copyWith(
-                    fontSize: 16,
-                    color: kColorMain,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: page <= 1
-                          ? null
-                          : () async {
-                              kLog.wtf('Getting next page results');
-                              page--;
-                              await _movieScrollController.animateTo(0,
-                                  duration: 500.milliseconds,
-                                  curve: Curves.easeIn);
-                              await checkUser();
-                            },
-                      child: Text(
-                        'Previous',
-                        style: kStyleLight.copyWith(
-                          fontSize: 16,
-                          color: page == 1
-                              ? kColorMain.withOpacity(0.5)
-                              : kColorMain,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        page++;
-                        await _movieScrollController.animateTo(0,
-                            duration: 500.milliseconds, curve: Curves.easeIn);
-                        await checkUser();
-                      },
-                      child: Text(
-                        'Next',
-                        style: kStyleLight.copyWith(
-                          fontSize: 16,
-                          color: page == recommendedMovies[1]
-                              ? kColorMain.withOpacity(0.5)
-                              : kColorMain,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
+                Flexible(
                   child: ClipRRect(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(
@@ -219,88 +229,86 @@ class _MoviesScreenState extends State<MoviesScreen> {
                             topLeft: Radius.circular(20),
                           ),
                         ),
-                        child: ListView.builder(
-                          controller: _movieScrollController,
-                          itemCount: recommendedMovies[0].length,
-                          itemBuilder: (context, index) => ListTile(
-                            onTap: () async {
-                              context.loaderOverlay.show();
-                              var videos = await getVideos(
-                                  recommendedMovies[0][index].id!);
-                              context.loaderOverlay.hide();
-                              await Get.to(
-                                () => MovieDetailsScreen(
-                                  movie: recommendedMovies[0][index],
-                                  videos: videos!,
-                                ),
-                              );
-                            },
-                            title: Text(
-                              recommendedMovies[0][index].title!,
-                              style: kStyleLight.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: kColorMain,
-                                fontSize: 17,
-                              ),
-                            ),
-                            subtitle: Text(
-                              formatDate(
-                                  recommendedMovies[0][index].releaseDate,
-                                  [d, ' ', MM, ' ', yyyy]),
-                              style: kStyleLight.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: kColorGrey,
-                                fontSize: 13,
-                              ),
-                            ),
-                            leading: recommendedMovies[0][index].posterPath ==
-                                    null
-                                ? ExtendedImage.network(
-                                    'https://i.imgur.com/ajjPdCO.png',
-                                    width: 40,
-                                    height: 120,
-                                    loadStateChanged: (state) {
-                                      if (state.extendedImageLoadState ==
-                                          LoadState.loading) {
-                                        return kSpinkit;
-                                      }
+                        child: PagedListView<int, Movie>(
+                          pagingController: _pagingController,
+                          builderDelegate: PagedChildBuilderDelegate<Movie>(
+                              itemBuilder: (context, movie, index) => ListTile(
+                                    onTap: () async {
+                                      context.loaderOverlay.show();
+                                      var videos = await getVideos(movie.id!);
+                                      context.loaderOverlay.hide();
+                                      await Get.to(
+                                        () => MovieDetailsScreen(
+                                          movie: movie,
+                                          videos: videos!,
+                                        ),
+                                      );
                                     },
-                                  )
-                                : ExtendedImage.network(
-                                    baseImgUrl +
-                                        recommendedMovies[0][index].posterPath!,
-                                    borderRadius: BorderRadius.circular(8),
-                                    width: 40,
-                                    height: 120,
-                                    shape: BoxShape.rectangle,
-                                    loadStateChanged: (state) {
-                                      if (state.extendedImageLoadState ==
-                                          LoadState.loading) {
-                                        return kSpinkit;
-                                      }
-                                    },
-                                  ),
-                            trailing: IconButton(
-                              onPressed: () async {
-                                await toggleFavorite(
-                                  Favorite(
-                                    email: kAuth.currentUser!.email!,
-                                    movieId: recommendedMovies[0][index].id,
-                                  ),
-                                );
-                                await checkIfFavorited();
-                                setState(() {});
-                              },
-                              icon: Icon(
-                                MfgLabs.heart,
-                                color: userFavorites.any((fav) =>
-                                        fav.movieId ==
-                                        recommendedMovies[0][index].id)
-                                    ? Colors.red
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
+                                    title: Text(
+                                      movie.title!,
+                                      style: kStyleLight.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: kColorMain,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      formatDate(movie.releaseDate!,
+                                          [d, ' ', MM, ' ', yyyy]),
+                                      style: kStyleLight.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: kColorGrey,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    leading: movie.posterPath == null
+                                        ? ExtendedImage.network(
+                                            'https://i.imgur.com/ajjPdCO.png',
+                                            width: 40,
+                                            height: 120,
+                                            loadStateChanged: (state) {
+                                              if (state
+                                                      .extendedImageLoadState ==
+                                                  LoadState.loading) {
+                                                return kSpinkit;
+                                              }
+                                            },
+                                          )
+                                        : ExtendedImage.network(
+                                            baseImgUrl + movie.posterPath!,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            width: 40,
+                                            height: 120,
+                                            shape: BoxShape.rectangle,
+                                            loadStateChanged: (state) {
+                                              if (state
+                                                      .extendedImageLoadState ==
+                                                  LoadState.loading) {
+                                                return kSpinkit;
+                                              }
+                                            },
+                                          ),
+                                    trailing: IconButton(
+                                      onPressed: () async {
+                                        await toggleFavorite(
+                                          Favorite(
+                                            email: kAuth.currentUser!.email!,
+                                            movieId: movie.id!,
+                                          ),
+                                        );
+                                        await checkIfFavorited();
+                                        setState(() {});
+                                      },
+                                      icon: Icon(
+                                        MfgLabs.heart,
+                                        color: userFavorites.any((fav) =>
+                                                fav.movieId == movie.id)
+                                            ? Colors.red
+                                            : Colors.white,
+                                      ),
+                                    ),
+                                  )),
                         ),
                       ),
                     ),
