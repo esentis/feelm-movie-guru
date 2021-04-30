@@ -36,14 +36,17 @@ Future getTrending() async {
 }
 
 /// Returns movies based on a search [term].
-Future searchMovies(String term) async {
+Future<List<Movie>> searchMovies(String term) async {
+  if (term.isEmpty) {
+    return [];
+  }
   Response response;
   try {
     response = await tmdb.get(
       '/3/search/movie',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
-        'language': 'en-US',
+        'language': 'el-GR',
         'include_adult': false,
         'page': 1,
         'query': term,
@@ -52,12 +55,12 @@ Future searchMovies(String term) async {
     kLog.i('Searching $term in movies.');
   } on DioError catch (e) {
     kLog.e(e);
-    return e.type;
+    return [];
   }
   // ignore: omit_local_variable_types
   MovieSearchResults searchResults = MovieSearchResults.fromMap(response.data);
 
-  return searchResults;
+  return searchResults.results!;
 }
 
 /// Returns movies based on [id].
