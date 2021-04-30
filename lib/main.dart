@@ -1,4 +1,3 @@
-import 'package:feelm/constants.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movies_screen.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,13 +30,7 @@ void main() async {
       title: 'Feelm Movie Guru',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
-      home: LoaderOverlay(
-        useDefaultLoading: false,
-        overlayWidget: Center(
-          child: kSpinkit,
-        ),
-        child: FeelMeRoot(currentUser),
-      ),
+      home: FeelMeRoot(currentUser),
     ),
   );
 }
