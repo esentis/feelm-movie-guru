@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:date_format/date_format.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:feelm/api/omdb.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/favorites.dart';
@@ -12,16 +13,16 @@ import 'package:feelm/models/sign.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/favorites_page.dart';
 import 'package:feelm/pages/landing_page.dart';
-import 'package:feelm/pages/movie_details_screen.dart';
+import 'package:feelm/pages/movie/movie_details_screen.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:modal_progress_hud_alt/modal_progress_hud_alt.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 class MoviesScreen extends StatefulWidget {
   @override
@@ -37,6 +38,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
   List<dynamic> recommendedMovies = ['', ''];
   List<Favorite> userFavorites = [];
   int page = 1;
+
+  bool isLoading = false;
 
   static const _pageSize = 20;
 
@@ -165,7 +168,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   ),
                 );
               },
-              child: Icon(
+              child: const Icon(
                 MfgLabs.heart,
                 color: Colors.red,
                 size: 35,
@@ -232,83 +235,111 @@ class _MoviesScreenState extends State<MoviesScreen> {
                         child: PagedListView<int, Movie>(
                           pagingController: _pagingController,
                           builderDelegate: PagedChildBuilderDelegate<Movie>(
-                              itemBuilder: (context, movie, index) => ListTile(
-                                    onTap: () async {
-                                      context.loaderOverlay.show();
-                                      var videos = await getVideos(movie.id!);
-                                      context.loaderOverlay.hide();
-                                      await Get.to(
-                                        () => MovieDetailsScreen(
-                                          movie: movie,
-                                          videos: videos!,
+                              newPageProgressIndicatorBuilder: (context) =>
+                                  kSpinkit,
+                              firstPageProgressIndicatorBuilder: (context) =>
+                                  kSpinkit,
+                              itemBuilder: (context, movie, index) =>
+                                  StatefulBuilder(
+                                      builder: (context, stateSetter) {
+                                    return Container(
+                                      width: 250,
+                                      height: 70,
+                                      child: ModalProgressHUD(
+                                        inAsyncCall: isLoading,
+                                        progressIndicator: kSpinkit,
+                                        child: ListTile(
+                                          onTap: () async {
+                                            stateSetter(() {
+                                              isLoading = !isLoading;
+                                            });
+                                            var videos =
+                                                await getVideos(movie.id!);
+                                            var detailedMovie =
+                                                await getMovies(movie.id!);
+                                            var imdbMovie = await getImdbMovie(
+                                                detailedMovie.imdbId!);
+                                            stateSetter(() {
+                                              isLoading = !isLoading;
+                                            });
+                                            await Get.to(
+                                              () => MovieDetailsScreen(
+                                                movie: detailedMovie,
+                                                imdbMovie: imdbMovie,
+                                                videos: videos!,
+                                              ),
+                                            );
+                                          },
+                                          title: Text(
+                                            movie.title!,
+                                            style: kStyleLight.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: kColorMain,
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                          subtitle: Text(
+                                            formatDate(movie.releaseDate!,
+                                                [d, ' ', MM, ' ', yyyy]),
+                                            style: kStyleLight.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: kColorGrey,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                          leading: movie.posterPath == null
+                                              ? ExtendedImage.network(
+                                                  'https://i.imgur.com/ajjPdCO.png',
+                                                  width: 40,
+                                                  height: 120,
+                                                  loadStateChanged: (state) {
+                                                    if (state
+                                                            .extendedImageLoadState ==
+                                                        LoadState.loading) {
+                                                      return kSpinkit;
+                                                    }
+                                                  },
+                                                )
+                                              : ExtendedImage.network(
+                                                  baseImgUrl +
+                                                      movie.posterPath!,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  width: 40,
+                                                  height: 120,
+                                                  shape: BoxShape.rectangle,
+                                                  loadStateChanged: (state) {
+                                                    if (state
+                                                            .extendedImageLoadState ==
+                                                        LoadState.loading) {
+                                                      return kSpinkit;
+                                                    }
+                                                  },
+                                                ),
+                                          trailing: IconButton(
+                                            onPressed: () async {
+                                              await toggleFavorite(
+                                                Favorite(
+                                                  email:
+                                                      kAuth.currentUser!.email!,
+                                                  movieId: movie.id!,
+                                                ),
+                                              );
+                                              await checkIfFavorited();
+                                              setState(() {});
+                                            },
+                                            icon: Icon(
+                                              MfgLabs.heart,
+                                              color: userFavorites.any((fav) =>
+                                                      fav.movieId == movie.id)
+                                                  ? Colors.red
+                                                  : Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    title: Text(
-                                      movie.title!,
-                                      style: kStyleLight.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: kColorMain,
-                                        fontSize: 17,
                                       ),
-                                    ),
-                                    subtitle: Text(
-                                      formatDate(movie.releaseDate!,
-                                          [d, ' ', MM, ' ', yyyy]),
-                                      style: kStyleLight.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: kColorGrey,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    leading: movie.posterPath == null
-                                        ? ExtendedImage.network(
-                                            'https://i.imgur.com/ajjPdCO.png',
-                                            width: 40,
-                                            height: 120,
-                                            loadStateChanged: (state) {
-                                              if (state
-                                                      .extendedImageLoadState ==
-                                                  LoadState.loading) {
-                                                return kSpinkit;
-                                              }
-                                            },
-                                          )
-                                        : ExtendedImage.network(
-                                            baseImgUrl + movie.posterPath!,
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            width: 40,
-                                            height: 120,
-                                            shape: BoxShape.rectangle,
-                                            loadStateChanged: (state) {
-                                              if (state
-                                                      .extendedImageLoadState ==
-                                                  LoadState.loading) {
-                                                return kSpinkit;
-                                              }
-                                            },
-                                          ),
-                                    trailing: IconButton(
-                                      onPressed: () async {
-                                        await toggleFavorite(
-                                          Favorite(
-                                            email: kAuth.currentUser!.email!,
-                                            movieId: movie.id!,
-                                          ),
-                                        );
-                                        await checkIfFavorited();
-                                        setState(() {});
-                                      },
-                                      icon: Icon(
-                                        MfgLabs.heart,
-                                        color: userFavorites.any((fav) =>
-                                                fav.movieId == movie.id)
-                                            ? Colors.red
-                                            : Colors.white,
-                                      ),
-                                    ),
-                                  )),
+                                    );
+                                  })),
                         ),
                       ),
                     ),
