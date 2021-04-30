@@ -6,7 +6,7 @@ class InfoContainer extends StatelessWidget {
   final double iconSize;
   final String text;
 
-  final String subtitleText;
+  final String? subtitleText;
   final double subtitleTextSize;
 
   final double space;
@@ -16,7 +16,7 @@ class InfoContainer extends StatelessWidget {
     required this.icon,
     required this.text,
     required this.iconColor,
-    required this.subtitleText,
+    this.subtitleText,
     this.iconSize = 25,
     this.space = 3,
     this.subtitleTextSize = 17,
@@ -46,7 +46,7 @@ class InfoContainer extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
-              subtitleText,
+              subtitleText ?? '',
               style: kStyleLight.copyWith(
                 fontSize: subtitleTextSize,
                 color: kColorMain,

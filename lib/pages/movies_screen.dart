@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
 import 'package:date_format/date_format.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:feelm/api/omdb.dart';
@@ -14,6 +15,7 @@ import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/favorites_page.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movie/movie_details_screen.dart';
+import 'package:feelm/pages/search_page.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -159,6 +161,26 @@ class _MoviesScreenState extends State<MoviesScreen> {
           ),
           Positioned(
             top: 40,
+            right: 75,
+            child: OpenContainer(
+              transitionType: ContainerTransitionType.fadeThrough,
+              openBuilder: (BuildContext context, VoidCallback _) {
+                return SearchPage();
+              },
+              closedElevation: 6.0,
+              closedColor: Colors.transparent,
+              closedBuilder:
+                  (BuildContext context, VoidCallback openContainer) {
+                return Icon(
+                  MfgLabs.search,
+                  color: kColorMain.withOpacity(0.5),
+                  size: 35,
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 40,
             right: 25,
             child: GestureDetector(
               onTap: () async {
@@ -235,111 +257,110 @@ class _MoviesScreenState extends State<MoviesScreen> {
                         child: PagedListView<int, Movie>(
                           pagingController: _pagingController,
                           builderDelegate: PagedChildBuilderDelegate<Movie>(
-                              newPageProgressIndicatorBuilder: (context) =>
-                                  kSpinkit,
-                              firstPageProgressIndicatorBuilder: (context) =>
-                                  kSpinkit,
-                              itemBuilder: (context, movie, index) =>
-                                  StatefulBuilder(
-                                      builder: (context, stateSetter) {
-                                    return Container(
-                                      width: 250,
-                                      height: 70,
-                                      child: ModalProgressHUD(
-                                        inAsyncCall: isLoading,
-                                        progressIndicator: kSpinkit,
-                                        child: ListTile(
-                                          onTap: () async {
-                                            stateSetter(() {
-                                              isLoading = !isLoading;
-                                            });
-                                            var videos =
-                                                await getVideos(movie.id!);
-                                            var detailedMovie =
-                                                await getMovies(movie.id!);
-                                            var imdbMovie = await getImdbMovie(
-                                                detailedMovie.imdbId!);
-                                            stateSetter(() {
-                                              isLoading = !isLoading;
-                                            });
-                                            await Get.to(
-                                              () => MovieDetailsScreen(
-                                                movie: detailedMovie,
-                                                imdbMovie: imdbMovie,
-                                                videos: videos!,
-                                              ),
-                                            );
-                                          },
-                                          title: Text(
-                                            movie.title!,
-                                            style: kStyleLight.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: kColorMain,
-                                              fontSize: 17,
-                                            ),
+                            newPageProgressIndicatorBuilder: (context) =>
+                                kSpinkit,
+                            firstPageProgressIndicatorBuilder: (context) =>
+                                kSpinkit,
+                            itemBuilder: (context, movie, index) =>
+                                StatefulBuilder(
+                              builder: (context, stateSetter) {
+                                return Container(
+                                  width: 250,
+                                  height: 70,
+                                  child: ModalProgressHUD(
+                                    inAsyncCall: isLoading,
+                                    progressIndicator: kSpinkit,
+                                    child: ListTile(
+                                      onTap: () async {
+                                        stateSetter(() {
+                                          isLoading = !isLoading;
+                                        });
+                                        var videos = await getVideos(movie.id!);
+                                        var detailedMovie =
+                                            await getMovies(movie.id!);
+                                        var imdbMovie = await getImdbMovie(
+                                            detailedMovie.imdbId!);
+                                        stateSetter(() {
+                                          isLoading = !isLoading;
+                                        });
+                                        await Get.to(
+                                          () => MovieDetailsScreen(
+                                            movie: detailedMovie,
+                                            imdbMovie: imdbMovie,
+                                            videos: videos!,
                                           ),
-                                          subtitle: Text(
-                                            formatDate(movie.releaseDate!,
-                                                [d, ' ', MM, ' ', yyyy]),
-                                            style: kStyleLight.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: kColorGrey,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                          leading: movie.posterPath == null
-                                              ? ExtendedImage.network(
-                                                  'https://i.imgur.com/ajjPdCO.png',
-                                                  width: 40,
-                                                  height: 120,
-                                                  loadStateChanged: (state) {
-                                                    if (state
-                                                            .extendedImageLoadState ==
-                                                        LoadState.loading) {
-                                                      return kSpinkit;
-                                                    }
-                                                  },
-                                                )
-                                              : ExtendedImage.network(
-                                                  baseImgUrl +
-                                                      movie.posterPath!,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  width: 40,
-                                                  height: 120,
-                                                  shape: BoxShape.rectangle,
-                                                  loadStateChanged: (state) {
-                                                    if (state
-                                                            .extendedImageLoadState ==
-                                                        LoadState.loading) {
-                                                      return kSpinkit;
-                                                    }
-                                                  },
-                                                ),
-                                          trailing: IconButton(
-                                            onPressed: () async {
-                                              await toggleFavorite(
-                                                Favorite(
-                                                  email:
-                                                      kAuth.currentUser!.email!,
-                                                  movieId: movie.id!,
-                                                ),
-                                              );
-                                              await checkIfFavorited();
-                                              setState(() {});
-                                            },
-                                            icon: Icon(
-                                              MfgLabs.heart,
-                                              color: userFavorites.any((fav) =>
-                                                      fav.movieId == movie.id)
-                                                  ? Colors.red
-                                                  : Colors.white,
-                                            ),
-                                          ),
+                                        );
+                                      },
+                                      title: Text(
+                                        movie.title!,
+                                        style: kStyleLight.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: kColorMain,
+                                          fontSize: 17,
                                         ),
                                       ),
-                                    );
-                                  })),
+                                      subtitle: Text(
+                                        formatDate(movie.releaseDate!,
+                                            [d, ' ', MM, ' ', yyyy]),
+                                        style: kStyleLight.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: kColorGrey,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      leading: movie.posterPath == null
+                                          ? ExtendedImage.network(
+                                              'https://i.imgur.com/ajjPdCO.png',
+                                              width: 40,
+                                              height: 120,
+                                              loadStateChanged: (state) {
+                                                if (state
+                                                        .extendedImageLoadState ==
+                                                    LoadState.loading) {
+                                                  return kSpinkit;
+                                                }
+                                              },
+                                            )
+                                          : ExtendedImage.network(
+                                              baseImgUrl + movie.posterPath!,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              width: 40,
+                                              height: 120,
+                                              shape: BoxShape.rectangle,
+                                              loadStateChanged: (state) {
+                                                if (state
+                                                        .extendedImageLoadState ==
+                                                    LoadState.loading) {
+                                                  return kSpinkit;
+                                                }
+                                              },
+                                            ),
+                                      trailing: IconButton(
+                                        onPressed: () async {
+                                          await toggleFavorite(
+                                            Favorite(
+                                              email: kAuth.currentUser!.email!,
+                                              movieId: movie.id!,
+                                            ),
+                                          );
+                                          await checkIfFavorited();
+                                          setState(() {});
+                                        },
+                                        icon: Icon(
+                                          MfgLabs.heart,
+                                          color: userFavorites.any((fav) =>
+                                                  fav.movieId == movie.id)
+                                              ? Colors.red
+                                              : Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -347,7 +368,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

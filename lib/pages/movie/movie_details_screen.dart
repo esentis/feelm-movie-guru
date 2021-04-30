@@ -16,12 +16,12 @@ import 'package:supercharged/supercharged.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final MovieDetailed movie;
-  final ImdbMovie imdbMovie;
+  final ImdbMovie? imdbMovie;
   final MovieVideos videos;
   const MovieDetailsScreen({
     required this.movie,
     required this.videos,
-    required this.imdbMovie,
+    this.imdbMovie,
   });
   @override
   _MovieDetailsScreenState createState() => _MovieDetailsScreenState();
@@ -85,7 +85,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             MM,
                             ' ',
                             yyyy
-                          ])}\n\n${widget.imdbMovie.plot!}\n${baseImgUrl + widget.movie.posterPath!}'
+                          ])}\n\n${widget.imdbMovie?.plot!}\n${baseImgUrl + widget.movie.posterPath!}'
                         : '${widget.movie.overview!} ${baseImgUrl + widget.movie.posterPath!}',
                     subject: widget.movie.title!,
                   );
@@ -172,13 +172,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            InfoContainer(
-                              icon: FontAwesome5.imdb,
-                              iconSize: 55,
-                              iconColor: kColorMain,
-                              text: '${widget.imdbMovie.imdbRating!}/10',
-                              subtitleText: widget.imdbMovie.imdbVotes!,
-                            ),
+                            if (widget.imdbMovie != null)
+                              InfoContainer(
+                                icon: FontAwesome5.imdb,
+                                iconSize: 55,
+                                iconColor: kColorMain,
+                                text: '${widget.imdbMovie?.imdbRating}/10',
+                                subtitleText: widget.imdbMovie?.imdbVotes,
+                              ),
                             const SizedBox(
                               width: 25,
                             ),
@@ -198,7 +199,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ),
                       ),
                       Text(
-                        widget.imdbMovie.runtime!,
+                        widget.imdbMovie?.runtime ?? '',
                         style: kStyleLight.copyWith(
                           fontSize: 18,
                           color: kColorMain,
@@ -206,7 +207,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        widget.imdbMovie.genre!,
+                        widget.imdbMovie?.genre ?? '',
                         style: kStyleLight.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -240,7 +241,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: Text(
                         // ignore: unnecessary_string_interpolations
                         widget.movie.overview!.isEmpty
-                            ? widget.imdbMovie.plot!
+                            ? widget.imdbMovie?.plot ?? ''
                             : widget.movie.overview!,
                         style: kStyleLight.copyWith(
                           color: kColorGrey,
@@ -249,7 +250,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
                     ),
                     // Movie's Box Office information if present
-                    if (widget.imdbMovie.boxOffice != 'N/A')
+                    if (widget.imdbMovie?.boxOffice != null &&
+                        widget.imdbMovie!.boxOffice != 'N/A')
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -263,7 +265,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              widget.imdbMovie.boxOffice!,
+                              widget.imdbMovie?.boxOffice ?? '',
                               style: kStyleLight.copyWith(
                                 color: kColorGrey,
                               ),
@@ -272,34 +274,37 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           ],
                         ),
                       ),
-                    // Movie's original poster
-                    if (widget.imdbMovie.poster != 'N/A')
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Original poster',
-                              style: kStyleLight.copyWith(
-                                fontSize: 16,
-                                color: kColorMain,
+                    if (widget.imdbMovie != null &&
+                        widget.imdbMovie?.poster != null)
+                      // Movie's original poster
+                      if (widget.imdbMovie!.poster != 'N/A')
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Original poster',
+                                style: kStyleLight.copyWith(
+                                  fontSize: 16,
+                                  color: kColorMain,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            ExtendedImage.network(
-                              widget.imdbMovie.poster!,
-                              loadStateChanged: (state) {
-                                if (state.extendedImageLoadState ==
-                                    LoadState.loading) {
-                                  return kSpinkit;
-                                }
-                              },
-                            ),
-                          ],
+                              ExtendedImage.network(
+                                widget.imdbMovie?.poster ?? '',
+                                loadStateChanged: (state) {
+                                  if (state.extendedImageLoadState ==
+                                      LoadState.loading) {
+                                    return kSpinkit;
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                     // Movie's production countries
-                    if (widget.imdbMovie.country != 'N/A')
+                    if (widget.imdbMovie!.country != 'N/A' &&
+                        widget.imdbMovie?.country != null)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -313,7 +318,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              widget.imdbMovie.country!,
+                              widget.imdbMovie?.country ?? '',
                               style: kStyleLight.copyWith(
                                 color: kColorGrey,
                               ),
@@ -324,7 +329,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       ),
 
                     // All movie Awards if any
-                    if (widget.imdbMovie.awards != 'N/A')
+                    if (widget.imdbMovie!.awards != 'N/A' &&
+                        widget.imdbMovie?.awards != null)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -338,7 +344,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              widget.imdbMovie.awards!,
+                              widget.imdbMovie?.awards ?? '',
                               style: kStyleLight.copyWith(
                                 color: kColorGrey,
                               ),
@@ -354,7 +360,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         showVideoProgressIndicator: true,
                       ),
                     // Movie's directors
-                    if (widget.imdbMovie.director != 'N/A')
+                    if (widget.imdbMovie!.director != 'N/A' &&
+                        widget.imdbMovie?.director != null)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -368,7 +375,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              widget.imdbMovie.director!,
+                              widget.imdbMovie?.director ?? '',
                               style: kStyleLight.copyWith(
                                 color: kColorGrey,
                               ),
@@ -378,7 +385,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ),
                       ),
                     // Actors
-                    if (widget.imdbMovie.actors != 'N/A')
+                    if (widget.imdbMovie!.actors != 'N/A' &&
+                        widget.imdbMovie?.actors != null)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -392,7 +400,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              widget.imdbMovie.actors!,
+                              widget.imdbMovie?.actors ?? '',
                               style: kStyleLight.copyWith(
                                 color: kColorGrey,
                               ),
