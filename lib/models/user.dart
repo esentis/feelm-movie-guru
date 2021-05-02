@@ -26,6 +26,12 @@ class GuruUser {
   String? email;
   DateTime? joinDate;
   String? zodiacSign;
+  bool? tested;
+
+  bool? get getTested => tested;
+
+  set setTested(tested) => this.tested = tested;
+
   String? get getEmail => email;
 
   set setEmail(email) => this.email = email;
@@ -41,12 +47,14 @@ class GuruUser {
     this.zodiacSign,
     this.email,
     this.joinDate,
+    this.tested,
   });
 
   factory GuruUser.fromMap(Map<String, dynamic> map) => GuruUser(
         zodiacSign: map['zodiacSign']!,
         email: map['email']!,
         joinDate: (map['joinDate']! as Timestamp).toDate(),
+        tested: map['tested'] ?? false,
       );
 }
 
