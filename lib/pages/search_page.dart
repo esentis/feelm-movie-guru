@@ -79,12 +79,7 @@ class _SearchPageState extends State<SearchPage> {
                         debounceDuration: 500.milliseconds,
                         textFieldConfiguration: TextFieldConfiguration(
                           controller: _searchController,
-                          focusNode: searchFocus
-                            ..addListener(() {
-                              if (!searchFocus.hasFocus && !tappedMovie) {
-                                Get.back();
-                              }
-                            }),
+                          focusNode: searchFocus,
                           autofocus: true,
                           style: kStyleLight.copyWith(
                             color: kColorMain,
@@ -135,6 +130,31 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           ),
                         ),
+                        onSuggestionSelected: (Movie movie) async {
+                          kLog.i('${movie.video}');
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+                          var videos = await getVideos(movie.id!);
+                          var detailedMovie = await getMovies(movie.id!);
+                          var imdbMovie = ImdbMovie();
+                          if (detailedMovie.imdbId != null) {
+                            imdbMovie =
+                                await getImdbMovie(detailedMovie.imdbId!);
+                          }
+
+                          setState(() {
+                            isLoading = !isLoading;
+                          });
+
+                          await Get.off(
+                            () => MovieDetailsScreen(
+                              movie: detailedMovie,
+                              imdbMovie: imdbMovie,
+                              videos: videos!,
+                            ),
+                          );
+                        },
                         itemBuilder: (context, Movie movie) {
                           return Container(
                             color: Colors.white,
@@ -142,31 +162,6 @@ class _SearchPageState extends State<SearchPage> {
                             height: 70,
                             child: ListTile(
                               tileColor: Colors.transparent,
-                              selectedTileColor: Colors.transparent,
-                              onTap: () async {
-                                setState(() {
-                                  isLoading = !isLoading;
-                                  tappedMovie = !tappedMovie;
-                                });
-                                var videos = await getVideos(movie.id!);
-                                var detailedMovie = await getMovies(movie.id!);
-                                var imdbMovie = ImdbMovie();
-                                if (detailedMovie.imdbId != null) {
-                                  imdbMovie =
-                                      await getImdbMovie(detailedMovie.imdbId!);
-                                }
-
-                                setState(() {
-                                  isLoading = !isLoading;
-                                });
-                                await Get.off(
-                                  () => MovieDetailsScreen(
-                                    movie: detailedMovie,
-                                    imdbMovie: imdbMovie,
-                                    videos: videos!,
-                                  ),
-                                );
-                              },
                               title: Text(
                                 movie.title!,
                                 style: kStyleLight.copyWith(
@@ -211,9 +206,6 @@ class _SearchPageState extends State<SearchPage> {
                                     ),
                             ),
                           );
-                        },
-                        onSuggestionSelected: (movie) {
-                          kLog.i('tapped');
                         },
                       ),
                     ),

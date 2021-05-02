@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:feelm/api/tmdb.dart';
 import 'package:feelm/constants.dart';
+import 'package:feelm/models/favorites.dart';
 import 'package:feelm/models/imdb_movie.dart';
 import 'package:feelm/models/movie.dart';
 import 'package:feelm/pages/movie/widgets/info_container.dart';
@@ -74,6 +76,43 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               ),
             ),
             actions: [
+              StreamBuilder<QuerySnapshot>(
+                stream: getUserFavoritesStream(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return kSpinkit;
+                  }
+                  // ignore: omit_local_variable_types
+                  List<Favorite> favs = [];
+                  snapshot.data!.docs.forEach(
+                    (qsDocument) {
+                      favs.add(Favorite.fromMap(qsDocument.data()!));
+                    },
+                  );
+
+                  var isFavorited = favs.any(
+                    (fav) =>
+                        fav.movieId == widget.movie.id! &&
+                        fav.email == kAuth.currentUser!.email,
+                  );
+                  return IconButton(
+                    // ${baseImgUrl + widget.movie.posterPath!}
+                    onPressed: () async {
+                      await toggleFavorite(
+                        Favorite(
+                          email: kAuth.currentUser!.email!,
+                          movieId: widget.movie.id!,
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      MfgLabs.heart,
+                      color: isFavorited ? Colors.red : Colors.white,
+                      size: 35,
+                    ),
+                  );
+                },
+              ),
               IconButton(
                 // ${baseImgUrl + widget.movie.posterPath!}
                 onPressed: () async {
@@ -95,7 +134,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   color: kColorMain,
                   size: 35,
                 ),
-              )
+              ),
             ],
             flexibleSpace: Stack(
               children: [
