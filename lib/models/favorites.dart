@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 
 var favorites = kFirestore.collection('favorites');
@@ -36,6 +37,12 @@ Future<List<Favorite>> getUserFavorites() async {
     },
   );
   return favList;
+}
+
+Stream<QuerySnapshot> getUserFavoritesStream() {
+  return favorites
+      .where('email', isEqualTo: kAuth.currentUser!.email)
+      .snapshots();
 }
 
 Future<void> toggleFavorite(Favorite favorite) async {
