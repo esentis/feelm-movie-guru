@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/movies_screen.dart';
+import 'package:feelm/pages/test_page.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -87,12 +88,6 @@ class _LandingPageState extends State<LandingPage>
   void initState() {
     // To randomize the background image
     random = Random().nextInt(10);
-    themeController = AnimationController(
-      vsync: this,
-      duration: 900.milliseconds,
-    );
-    kLog.wtf(Get.theme.brightness);
-
     super.initState();
   }
 
@@ -102,7 +97,6 @@ class _LandingPageState extends State<LandingPage>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // He
           MirrorAnimation<double>(
             tween: 0.0.tweenTo(-350.0),
             duration: 55.seconds,
@@ -262,8 +256,13 @@ class _LandingPageState extends State<LandingPage>
                                                                 password:
                                                                     _passwordController
                                                                         .text);
+
+                                                        var guruUser =
+                                                            await getGuruUser(
+                                                                user.user!
+                                                                    .email!);
                                                         kLog.wtf(
-                                                            user.user?.uid);
+                                                            guruUser!.tested);
                                                         await Get.offAll(() =>
                                                             MoviesScreen());
                                                       } on FirebaseAuthException catch (e) {
@@ -432,6 +431,9 @@ class _LandingPageState extends State<LandingPage>
                                                 );
                                               }
                                             } else {
+                                              var guruUser = await getGuruUser(
+                                                  user.user!.email!);
+                                              kLog.wtf(guruUser!.tested);
                                               await Get.offAll(
                                                 () => MoviesScreen(),
                                               );
@@ -484,9 +486,16 @@ class _LandingPageState extends State<LandingPage>
                                                 );
                                               }
                                             } else {
-                                              await Get.offAll(
-                                                () => MoviesScreen(),
-                                              );
+                                              var guruUser = await getGuruUser(
+                                                  user.user!.email!);
+                                              kLog.wtf(guruUser!.tested);
+                                              if (!guruUser.tested!) {
+                                                await Get.to(() => TestPage());
+                                              } else {
+                                                await Get.offAll(
+                                                  () => MoviesScreen(),
+                                                );
+                                              }
                                             }
                                           } else {
                                             feelmSnackbar(
