@@ -227,25 +227,6 @@ class _LandingPageState extends State<LandingPage>
                                               Flexible(
                                                 child: ElevatedButton(
                                                   onPressed: () async {
-                                                    // var user = FirebaseAuth
-                                                    //     .instance.currentUser;
-                                                    // if (user != null) {
-                                                    //   await users
-                                                    //       .where('email',
-                                                    //           isEqualTo:
-                                                    //               user.email)
-                                                    //       .get()
-                                                    //       .then((qs) {
-                                                    //     kLog.wtf(qs.docs.first
-                                                    //         .data());
-                                                    //   }).catchError(
-                                                    //     // ignore: return_of_invalid_type_from_catch_error
-                                                    //     (error) => kLog.e(
-                                                    //       error.toString(),
-                                                    //     ),
-                                                    //   );
-                                                    // }
-
                                                     if (showLogin) {
                                                       try {
                                                         var user = await kAuth
@@ -256,7 +237,6 @@ class _LandingPageState extends State<LandingPage>
                                                                 password:
                                                                     _passwordController
                                                                         .text);
-
                                                         var guruUser =
                                                             await getGuruUser(
                                                                 user.user!
@@ -298,8 +278,19 @@ class _LandingPageState extends State<LandingPage>
                                                             ),
                                                           );
                                                           await Get.offAll(
-                                                            () =>
-                                                                MoviesScreen(),
+                                                            () => TestPage(
+                                                              user: GuruUser(
+                                                                email:
+                                                                    userCredential
+                                                                        .user!
+                                                                        .email,
+                                                                zodiacSign:
+                                                                    sign,
+                                                                joinDate:
+                                                                    DateTime
+                                                                        .now(),
+                                                              ),
+                                                            ),
                                                           );
                                                         } else {
                                                           feelmSnackbar(
@@ -421,7 +412,13 @@ class _LandingPageState extends State<LandingPage>
                                                   ),
                                                 );
                                                 await Get.offAll(
-                                                  () => MoviesScreen(),
+                                                  () => TestPage(
+                                                    user: GuruUser(
+                                                      email: user.user!.email,
+                                                      zodiacSign: sign,
+                                                      joinDate: DateTime.now(),
+                                                    ),
+                                                  ),
                                                 );
                                               } else {
                                                 feelmSnackbar(
@@ -433,10 +430,17 @@ class _LandingPageState extends State<LandingPage>
                                             } else {
                                               var guruUser = await getGuruUser(
                                                   user.user!.email!);
-                                              kLog.wtf(guruUser!.tested);
-                                              await Get.offAll(
-                                                () => MoviesScreen(),
-                                              );
+                                              if (!guruUser!.tested!) {
+                                                await Get.offAll(
+                                                  () => TestPage(
+                                                    user: guruUser,
+                                                  ),
+                                                );
+                                              } else {
+                                                await Get.offAll(
+                                                  () => MoviesScreen(),
+                                                );
+                                              }
                                             }
                                           } else {
                                             feelmSnackbar(
@@ -476,7 +480,13 @@ class _LandingPageState extends State<LandingPage>
                                                   ),
                                                 );
                                                 await Get.offAll(
-                                                  () => MoviesScreen(),
+                                                  () => TestPage(
+                                                    user: GuruUser(
+                                                      email: user.user!.email,
+                                                      zodiacSign: sign,
+                                                      joinDate: DateTime.now(),
+                                                    ),
+                                                  ),
                                                 );
                                               } else {
                                                 feelmSnackbar(
@@ -490,7 +500,11 @@ class _LandingPageState extends State<LandingPage>
                                                   user.user!.email!);
                                               kLog.wtf(guruUser!.tested);
                                               if (!guruUser.tested!) {
-                                                await Get.to(() => TestPage());
+                                                await Get.to(
+                                                  () => TestPage(
+                                                    user: guruUser,
+                                                  ),
+                                                );
                                               } else {
                                                 await Get.offAll(
                                                   () => MoviesScreen(),

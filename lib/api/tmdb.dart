@@ -147,20 +147,27 @@ Future<KeywordResults> getKeywords(String term) async {
   }
 }
 
-/// Discover movies with [keywords]. [keywords] is a string with concatinated Keyword ids.
+/// Discover movies with [includedKeywords]. [includedKeywords] is a string with concatinated Keyword ids.
 ///
 /// Keyword ids can be created by searching keywords with:
 /// ```dart
 /// getKeywords(String term)
 /// ```
 /// which returns a list of keywords used by movies.
-Future<List<Movie>> discoverMovies(String keywords, {int page = 1}) async {
+Future<List<Movie>> discoverMovies({
+  String includedKeywords = '',
+  String excludedKeywords = '',
+  int page = 1,
+}) async {
+  kLog.i(
+      'Included keywords $includedKeywords\nExcluded keyword $excludedKeywords');
   try {
     var response = await tmdb.get(
       '/3/discover/movie',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
-        'with_keywords': keywords,
+        'with_keywords': includedKeywords,
+        'without_keywords': excludedKeywords,
         'page': page,
         'language': 'el-GR',
       },

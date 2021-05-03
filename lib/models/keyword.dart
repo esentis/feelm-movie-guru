@@ -24,7 +24,7 @@ class Keyword {
 
   factory Keyword.fromJson(Map<String, dynamic>? json) => Keyword(
         name: json!['name'],
-        id: json['id'],
+        id: json['id'].toString(),
       );
 
   Map<String, dynamic> toJson() => {

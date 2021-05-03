@@ -47,37 +47,36 @@ class _MoviesScreenState extends State<MoviesScreen> {
   final PagingController<int, Movie> _pagingController =
       PagingController(firstPageKey: 1);
 
-  String concatKeywords = '';
+  String includeKeywords = '';
+  String excludeKeywords = '';
 
-  Future<void> checkUser({bool firstStart = false}) async {
+  Future<void> initializeRecommendations() async {
     if (kAuth.currentUser == null) {
       await Get.to(() => const LandingPage());
     }
-    if (firstStart) {
-      signs = await getSigns();
-      currentGuruUser = await getGuruUser(kAuth.currentUser!.email!);
-      usersSign = signs
-          .firstWhere((element) => element.name == currentGuruUser?.zodiacSign);
+    signs = await getSigns();
+    currentGuruUser = await getGuruUser(kAuth.currentUser!.email!);
+    usersSign =
+        signs.firstWhere((sign) => sign.name == currentGuruUser?.zodiacSign);
 
-      var keywordIds = List.generate(
-        usersSign.keywords.length,
-        (index) => usersSign.keywords[index].id.toString(),
-      );
-      concatKeywords = keywordIds.join('|');
-      recommendedMovies = await discoverMovies(concatKeywords, page: page);
-      // feelmSnackbar(status.SUCCESS, 'Welcome back', kAuth.currentUser!.email!);
-      setState(() {});
-    } else {
-      recommendedMovies = [];
-      recommendedMovies = await discoverMovies(concatKeywords, page: page);
-      setState(() {});
-    }
+    var keywordIds = List.generate(
+      usersSign.keywords.length,
+      (index) => usersSign.keywords[index].id.toString(),
+    );
+    includeKeywords =
+        '${keywordIds.join('|')}${currentGuruUser!.includedKeywords!}';
+    excludeKeywords = currentGuruUser!.excludedKeywords ?? '';
+    setState(() {});
   }
 
   Future<void> _fetchPage(int pageKey) async {
     try {
       // ignore: omit_local_variable_types
-      List<Movie> newItems = await discoverMovies(concatKeywords, page: page);
+      List<Movie> newItems = await discoverMovies(
+        includedKeywords: includeKeywords,
+        excludedKeywords: excludeKeywords,
+        page: page,
+      );
       var isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         kLog.w('Got to last page !');
@@ -96,11 +95,12 @@ class _MoviesScreenState extends State<MoviesScreen> {
   void initState() {
     random = Random().nextInt(10);
     // ignore: unnecessary_lambdas
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
-    });
+
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      await checkUser(firstStart: true);
+      await initializeRecommendations();
+      _pagingController.addPageRequestListener((pageKey) {
+        _fetchPage(pageKey);
+      });
     });
     super.initState();
   }
@@ -262,118 +262,139 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                   topLeft: Radius.circular(20),
                                 ),
                               ),
-                              child: PagedListView<int, Movie>(
-                                pagingController: _pagingController,
-                                builderDelegate:
-                                    PagedChildBuilderDelegate<Movie>(
-                                  newPageProgressIndicatorBuilder: (context) =>
-                                      kSpinkit,
-                                  firstPageProgressIndicatorBuilder:
-                                      (context) => kSpinkit,
-                                  itemBuilder: (context, movie, index) =>
-                                      StatefulBuilder(
-                                    builder: (context, stateSetter) {
-                                      return Container(
-                                        width: 250,
-                                        height: 70,
-                                        child: ModalProgressHUD(
-                                          inAsyncCall: isLoading,
-                                          progressIndicator: kSpinkit,
-                                          child: ListTile(
-                                            onTap: () async {
-                                              stateSetter(() {
-                                                isLoading = !isLoading;
-                                              });
-                                              var videos =
-                                                  await getVideos(movie.id!);
-                                              var detailedMovie =
-                                                  await getMovies(movie.id!);
-                                              var imdbMovie =
-                                                  await getImdbMovie(
-                                                      detailedMovie.imdbId!);
-                                              stateSetter(() {
-                                                isLoading = !isLoading;
-                                              });
-                                              await Get.to(
-                                                () => MovieDetailsScreen(
-                                                  movie: detailedMovie,
-                                                  imdbMovie: imdbMovie,
-                                                  videos: videos!,
+                              child: includeKeywords.isEmpty
+                                  ? kSpinkit
+                                  : PagedListView<int, Movie>(
+                                      pagingController: _pagingController,
+                                      builderDelegate:
+                                          PagedChildBuilderDelegate<Movie>(
+                                        newPageProgressIndicatorBuilder:
+                                            (context) => kSpinkit,
+                                        firstPageProgressIndicatorBuilder:
+                                            (context) => kSpinkit,
+                                        itemBuilder: (context, movie, index) =>
+                                            StatefulBuilder(
+                                          builder: (context, stateSetter) {
+                                            return Container(
+                                              width: 250,
+                                              height: 70,
+                                              child: ModalProgressHUD(
+                                                inAsyncCall: isLoading,
+                                                progressIndicator: kSpinkit,
+                                                child: ListTile(
+                                                  onTap: () async {
+                                                    stateSetter(() {
+                                                      isLoading = !isLoading;
+                                                    });
+                                                    var videos =
+                                                        await getVideos(
+                                                            movie.id!);
+                                                    var detailedMovie =
+                                                        await getMovies(
+                                                            movie.id!);
+                                                    var imdbMovie =
+                                                        await getImdbMovie(
+                                                            detailedMovie
+                                                                .imdbId!);
+                                                    stateSetter(() {
+                                                      isLoading = !isLoading;
+                                                    });
+                                                    await Get.to(
+                                                      () => MovieDetailsScreen(
+                                                        movie: detailedMovie,
+                                                        imdbMovie: imdbMovie,
+                                                        videos: videos!,
+                                                      ),
+                                                    );
+                                                  },
+                                                  title: Text(
+                                                    movie.title!,
+                                                    style: kStyleLight.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: kColorMain,
+                                                      fontSize: 17,
+                                                    ),
+                                                  ),
+                                                  subtitle: Text(
+                                                    formatDate(
+                                                        movie.releaseDate!, [
+                                                      d,
+                                                      ' ',
+                                                      MM,
+                                                      ' ',
+                                                      yyyy
+                                                    ]),
+                                                    style: kStyleLight.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: kColorGrey,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                  leading: movie.posterPath ==
+                                                          null
+                                                      ? ExtendedImage.network(
+                                                          'https://i.imgur.com/ajjPdCO.png',
+                                                          width: 40,
+                                                          height: 120,
+                                                          loadStateChanged:
+                                                              (state) {
+                                                            if (state
+                                                                    .extendedImageLoadState ==
+                                                                LoadState
+                                                                    .loading) {
+                                                              return kSpinkit;
+                                                            }
+                                                          },
+                                                        )
+                                                      : ExtendedImage.network(
+                                                          baseImgUrl +
+                                                              movie.posterPath!,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                          width: 40,
+                                                          height: 120,
+                                                          shape: BoxShape
+                                                              .rectangle,
+                                                          loadStateChanged:
+                                                              (state) {
+                                                            if (state
+                                                                    .extendedImageLoadState ==
+                                                                LoadState
+                                                                    .loading) {
+                                                              return kSpinkit;
+                                                            }
+                                                          },
+                                                        ),
+                                                  trailing: IconButton(
+                                                    onPressed: () async {
+                                                      await toggleFavorite(
+                                                        Favorite(
+                                                          email: kAuth
+                                                              .currentUser!
+                                                              .email!,
+                                                          movieId: movie.id!,
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      MfgLabs.heart,
+                                                      color: favs.any((fav) =>
+                                                              fav.movieId ==
+                                                              movie.id)
+                                                          ? Colors.red
+                                                          : Colors.white,
+                                                    ),
+                                                  ),
                                                 ),
-                                              );
-                                            },
-                                            title: Text(
-                                              movie.title!,
-                                              style: kStyleLight.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: kColorMain,
-                                                fontSize: 17,
                                               ),
-                                            ),
-                                            subtitle: Text(
-                                              formatDate(movie.releaseDate!,
-                                                  [d, ' ', MM, ' ', yyyy]),
-                                              style: kStyleLight.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: kColorGrey,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                            leading: movie.posterPath == null
-                                                ? ExtendedImage.network(
-                                                    'https://i.imgur.com/ajjPdCO.png',
-                                                    width: 40,
-                                                    height: 120,
-                                                    loadStateChanged: (state) {
-                                                      if (state
-                                                              .extendedImageLoadState ==
-                                                          LoadState.loading) {
-                                                        return kSpinkit;
-                                                      }
-                                                    },
-                                                  )
-                                                : ExtendedImage.network(
-                                                    baseImgUrl +
-                                                        movie.posterPath!,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    width: 40,
-                                                    height: 120,
-                                                    shape: BoxShape.rectangle,
-                                                    loadStateChanged: (state) {
-                                                      if (state
-                                                              .extendedImageLoadState ==
-                                                          LoadState.loading) {
-                                                        return kSpinkit;
-                                                      }
-                                                    },
-                                                  ),
-                                            trailing: IconButton(
-                                              onPressed: () async {
-                                                await toggleFavorite(
-                                                  Favorite(
-                                                    email: kAuth
-                                                        .currentUser!.email!,
-                                                    movieId: movie.id!,
-                                                  ),
-                                                );
-                                              },
-                                              icon: Icon(
-                                                MfgLabs.heart,
-                                                color: favs.any((fav) =>
-                                                        fav.movieId == movie.id)
-                                                    ? Colors.red
-                                                    : Colors.white,
-                                              ),
-                                            ),
-                                          ),
+                                            );
+                                          },
                                         ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

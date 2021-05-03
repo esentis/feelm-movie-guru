@@ -1,6 +1,7 @@
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/landing_page.dart';
 import 'package:feelm/pages/movies_screen.dart';
+import 'package:feelm/pages/test_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,6 @@ void main() async {
     GetMaterialApp(
       title: 'Feelm Movie Guru',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
       home: FeelMeRoot(currentUser),
     ),
   );
@@ -40,6 +40,13 @@ class FeelMeRoot extends StatelessWidget {
   const FeelMeRoot(this.user);
   @override
   Widget build(BuildContext context) {
-    return user == null ? const LandingPage() : MoviesScreen();
+    return user == null
+        ? const LandingPage()
+        // If user has not been tested yet we prompt him to the test page.
+        : user!.tested == null || !user!.tested!
+            ? TestPage(
+                user: user,
+              )
+            : MoviesScreen();
   }
 }
