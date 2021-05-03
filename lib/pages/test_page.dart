@@ -1,14 +1,24 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:feelm/constants.dart';
+import 'package:feelm/models/keyword.dart';
+import 'package:feelm/models/movie_reference.dart';
+import 'package:feelm/models/user.dart';
+import 'package:feelm/pages/movies_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
+import 'package:get/get.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:tcard/tcard.dart';
 
+// ignore: must_be_immutable
 class TestPage extends StatefulWidget {
+  GuruUser? user;
+  TestPage({this.user});
   @override
   _TestPageState createState() => _TestPageState();
 }
@@ -16,47 +26,21 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   var random;
   TCardController cardController = TCardController();
-  List<String> images = [
-    'https://i.imgur.com/Bp7O5SV.jpg',
-    'https://i.imgur.com/My2bzCs.jpg',
-    'https://i.imgur.com/xGZ302v.jpg',
-    'https://i.imgur.com/JW5gR8T.jpg',
-  ];
+
+  List<Keyword> includedKeys = [];
+  List<Keyword> excludedKeys = [];
+
+  var currentIndex = 1;
 
   @override
   void initState() {
     random = Random().nextInt(10);
+    kLog.wtf('User email is ${widget.user!.email}');
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> cards = List.generate(
-      images.length,
-      (int index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                offset: Offset(0, 17),
-                blurRadius: 23.0,
-                spreadRadius: -13.0,
-                color: Colors.black54,
-              )
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: Image.network(
-              images[index],
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      },
-    );
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -95,7 +79,7 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
           Positioned(
-            top: 30,
+            top: 25,
             left: 70,
             right: 70,
             child: ClipRRect(
@@ -109,16 +93,29 @@ class _TestPageState extends State<TestPage> {
                   color: Colors.white.withOpacity(0.3),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5,
+                      horizontal: 5.0,
+                      vertical: 2,
                     ),
-                    child: Text(
-                      'Παρακαλώ διαλλέξτε τις ταινίες που σας αρέσουν',
-                      textAlign: TextAlign.center,
-                      style: kStyleLight.copyWith(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Παρακαλώ διαλλέξτε τις ταινίες που σας αρέσουν',
+                          textAlign: TextAlign.center,
+                          style: kStyleLight.copyWith(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          '$currentIndex/15',
+                          textAlign: TextAlign.center,
+                          style: kStyleLight.copyWith(
+                            color: kColorMain,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -140,46 +137,124 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
           Positioned(
-            top: 75,
+            top: 90,
             bottom: 0,
             right: 10,
             left: 10,
-            child: TCard(
-              controller: cardController,
-              size: const Size(400, 600),
-              lockYAxis: true,
-              cards: cards,
-              slideSpeed: 15,
-              onForward: (index, info) {
-                kLog.i('Current index is $index');
-                kLog.i(info.direction);
-                if (info.direction == SwipDirection.Right) {
-                  kLog.i('like');
-                } else {
-                  kLog.i('dislike');
-                }
-              },
-              onBack: (index, info) {
-                kLog.i(index);
-              },
-              onEnd: () {
-                kLog.w('Cards have ended');
-              },
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 25,
-            child: GestureDetector(
-              onTap: () async {
-                cardController.back();
-              },
-              child: const Icon(
-                MfgLabs.reply,
-                color: Colors.white,
-                size: 35,
-              ),
-            ),
+            child: StreamBuilder<QuerySnapshot>(
+                stream: getReferencesStream(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return kSpinkit;
+                  }
+                  // ignore: omit_local_variable_types
+                  List<MovieReference> refs = [];
+                  snapshot.data!.docs.forEach(
+                    (qsDocument) {
+                      refs.add(MovieReference.fromMap(qsDocument.data()!));
+                    },
+                  );
+                  // ignore: omit_local_variable_types
+                  List<Widget> cards = List.generate(
+                    refs.length,
+                    (int index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.0),
+                          boxShadow: [
+                            const BoxShadow(
+                              offset: Offset(0, 17),
+                              blurRadius: 23.0,
+                              spreadRadius: -13.0,
+                              color: Colors.black54,
+                            )
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
+                          child: ExtendedImage.network(
+                            refs[index].image,
+                            fit: BoxFit.cover,
+                            loadStateChanged: (state) {
+                              if (state.extendedImageLoadState ==
+                                  LoadState.loading) {
+                                return kSpinkit;
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  )..shuffle();
+
+                  return TCard(
+                    controller: cardController,
+                    size: const Size(400, 600),
+                    lockYAxis: true,
+                    cards: cards.take(15).toList(),
+                    slideSpeed: 15,
+                    onForward: (index, info) {
+                      if (info.direction == SwipDirection.Right) {
+                        kLog.i('${refs[index - 1].name} liked !');
+                        includedKeys.addAll(refs[index - 1].keywords);
+                      } else {
+                        kLog.w('${refs[index - 1].name} disliked !');
+                        excludedKeys.addAll(refs[index - 1].keywords);
+                      }
+                      setState(() {
+                        currentIndex = index + 1;
+                      });
+                    },
+                    onBack: (index, info) {
+                      kLog.i(index);
+                    },
+                    onEnd: () async {
+                      kLog.w('Cards have ended');
+
+                      // The included keys should be concluded after removing excluded keys
+
+                      excludedKeys = excludedKeys
+                          .where(
+                            (exKey) =>
+                                includedKeys
+                                    .where((inKey) => exKey.name == inKey.name)
+                                    .count() <=
+                                excludedKeys
+                                    .where((inKey) => exKey.name == inKey.name)
+                                    .count(),
+                          )
+                          .toList();
+                      includedKeys = includedKeys
+                          .where(
+                            (inKey) => !excludedKeys
+                                .any((exKey) => inKey.name == exKey.name),
+                          )
+                          .toList();
+                      var includedKeywordIds = List.generate(
+                        includedKeys.length,
+                        (index) => includedKeys[index].id.toString(),
+                      ).toSet().toList();
+
+                      var excludedKeywordIds = List.generate(
+                        excludedKeys.length,
+                        (index) => excludedKeys[index].id.toString(),
+                      ).toSet().toList();
+
+                      kLog.wtf(
+                          'Included keyword length ${includedKeywordIds.length}');
+                      kLog.wtf(
+                          'Excluded keyword length ${excludedKeywordIds.length}');
+                      widget.user!.includedKeywords =
+                          "|${includedKeywordIds.join('|')}";
+                      widget.user!.excludedKeywords =
+                          excludedKeywordIds.join('|');
+                      kLog.wtf(widget.user!.email);
+                      await updateUser(widget.user!);
+                      await Get.offAll(() => MoviesScreen());
+                    },
+                  );
+                }),
           ),
         ],
       ),
