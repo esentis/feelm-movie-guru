@@ -1,24 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
+import 'package:feelm/models/keyword.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 
 var users = kFirestore.collection('users');
 
 extension UserExtensions on User? {
   Future<GuruUser> toGuruUser() async {
+    var user = GuruUser();
     if (this != null) {
       await users.where('email', isEqualTo: this!.email).get().then(
         (qs) {
           if (qs.docs.isNotEmpty) {
-            var user = GuruUser.fromMap(qs.docs.first.data()!);
+            user = GuruUser.fromMap(qs.docs.first.data()!);
             kLog.wtf('${user.email} is logged in.');
-            return GuruUser.fromMap(qs.docs.first.data()!);
+
+            // return GuruUser.fromMap(qs.docs.first.data()!);
           }
         },
       );
     }
-    return GuruUser();
+    return user;
   }
 }
 
@@ -27,6 +29,18 @@ class GuruUser {
   DateTime? joinDate;
   String? zodiacSign;
   bool? tested;
+  String? includedKeywords;
+  String? excludedKeywords;
+
+  String? get getIncludedKeywords => includedKeywords;
+
+  set setIncludedKeywords(includedKeywords) =>
+      this.includedKeywords = includedKeywords;
+
+  String? get getExcludedKeywords => excludedKeywords;
+
+  set setExcludedKeywords(excludedKeywords) =>
+      this.excludedKeywords = excludedKeywords;
 
   bool? get getTested => tested;
 
@@ -48,22 +62,26 @@ class GuruUser {
     this.email,
     this.joinDate,
     this.tested,
+    this.excludedKeywords,
+    this.includedKeywords,
   });
 
   factory GuruUser.fromMap(Map<String, dynamic> map) => GuruUser(
         zodiacSign: map['zodiacSign']!,
-        email: map['email']!,
+        email: map['email'] ?? kAuth.currentUser!.email,
         joinDate: (map['joinDate']! as Timestamp).toDate(),
         tested: map['tested'] ?? false,
+        includedKeywords: map['includedKeywords'] ?? '',
+        excludedKeywords: map['excludedKeywords'] ?? '',
       );
 }
 
-class UserProvider extends ChangeNotifier {
-  UserProvider({
-    required this.currentUser,
-  });
-  GuruUser? currentUser;
-}
+// class UserProvider extends ChangeNotifier {
+//   UserProvider({
+//     required this.currentUser,
+//   });
+//   GuruUser? currentUser;
+// }
 
 Future<bool> checkMail(String? email) async {
   var exists = false;
@@ -94,4 +112,29 @@ void createUser(GuruUser user) {
       )
       .then((value) => kLog.i('User ${value.id} added !'))
       .catchError((error) => kLog.e(error));
+}
+
+Future<void> updateUser(GuruUser user) async {
+  await users.where('email', isEqualTo: user.email).get().then(
+    (qs) {
+      if (qs.docs.isNotEmpty) {
+        // ignore: omit_local_variable_types
+
+        qs.docs.forEach(
+          (snap) {
+            users
+                .doc(snap.reference.id)
+                .update({
+                  'includedKeywords': user.includedKeywords,
+                  'excludedKeywords': user.excludedKeywords,
+                  'tested': true,
+                })
+                .then((value) => kLog.i('User Updated'))
+                .catchError((error) => kLog.e('Failed to update user: $error'));
+          },
+        );
+      }
+    },
+    // ignore: return_of_invalid_type_from_catch_error
+  ).catchError((error) => kLog.e(error));
 }
