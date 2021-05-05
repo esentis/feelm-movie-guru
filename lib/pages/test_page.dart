@@ -9,8 +9,8 @@ import 'package:feelm/models/movie_reference.dart';
 import 'package:feelm/models/user.dart';
 import 'package:feelm/pages/movies_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttericon/mfg_labs_icons.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:tcard/tcard.dart';
@@ -65,21 +65,21 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
           Positioned(
-            top: 40,
-            left: 25,
+            top: 25,
+            left: 0,
             child: GestureDetector(
               onTap: () async {
-                cardController.forward(direction: SwipDirection.Left);
+                cardController.forward(direction: SwipDirection.Right);
               },
-              child: const Icon(
-                MfgLabs.cancel_circled,
-                color: Colors.red,
-                size: 35,
+              child: Lottie.asset(
+                'assets/left_swipe.json',
+                height: 100,
+                width: 100,
               ),
             ),
           ),
           Positioned(
-            top: 25,
+            top: 50,
             left: 70,
             right: 70,
             child: ClipRRect(
@@ -91,53 +91,47 @@ class _TestPageState extends State<TestPage> {
                 ),
                 child: Container(
                   color: Colors.white.withOpacity(0.3),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5.0,
-                      vertical: 2,
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Παρακαλώ διαλλέξτε τις ταινίες που σας αρέσουν',
-                          textAlign: TextAlign.center,
-                          style: kStyleLight.copyWith(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Παρακαλώ διαλλέξτε τις ταινίες που σας αρέσουν',
+                        textAlign: TextAlign.center,
+                        style: kStyleLight.copyWith(
+                          color: Colors.white,
+                          fontSize: 16,
                         ),
-                        Text(
-                          '$currentIndex/15',
-                          textAlign: TextAlign.center,
-                          style: kStyleLight.copyWith(
-                            color: kColorMain,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                      ),
+                      Text(
+                        '$currentIndex/15',
+                        textAlign: TextAlign.center,
+                        style: kStyleLight.copyWith(
+                          color: kColorMain,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
           Positioned(
-            top: 40,
-            right: 25,
+            top: 25,
+            right: 0,
             child: GestureDetector(
               onTap: () async {
                 cardController.forward(direction: SwipDirection.Right);
               },
-              child: const Icon(
-                MfgLabs.ok_circled,
-                color: Colors.green,
-                size: 35,
+              child: Lottie.asset(
+                'assets/right_swipe.json',
+                height: 100,
+                width: 100,
               ),
             ),
           ),
           Positioned(
-            top: 90,
+            top: 120,
             bottom: 0,
             right: 10,
             left: 10,
