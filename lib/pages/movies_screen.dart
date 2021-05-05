@@ -98,6 +98,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await initializeRecommendations();
+      // ignore: unnecessary_lambdas
       _pagingController.addPageRequestListener((pageKey) {
         _fetchPage(pageKey);
       });

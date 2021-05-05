@@ -254,32 +254,26 @@ class _LandingPageState extends State<LandingPage>
                                                       }
                                                     } else {
                                                       try {
-                                                        var sign =
-                                                            await showPickerDate(
-                                                                context);
-                                                        if (sign.isNotEmpty) {
-                                                          var userCredential = await kAuth
-                                                              .createUserWithEmailAndPassword(
-                                                                  email:
-                                                                      _emailController
-                                                                          .text,
-                                                                  password:
-                                                                      _passwordController
-                                                                          .text);
-                                                          createUser(
-                                                            GuruUser(
-                                                              email:
-                                                                  userCredential
-                                                                      .user!
-                                                                      .email,
-                                                              zodiacSign: sign,
-                                                              joinDate: DateTime
-                                                                  .now(),
-                                                            ),
-                                                          );
-                                                          await Get.offAll(
-                                                            () => TestPage(
-                                                              user: GuruUser(
+                                                        if (_emailController
+                                                                .text
+                                                                .isNotEmpty &&
+                                                            _passwordController
+                                                                .text
+                                                                .isNotEmpty) {
+                                                          var sign =
+                                                              await showPickerDate(
+                                                                  context);
+                                                          if (sign.isNotEmpty) {
+                                                            var userCredential =
+                                                                await kAuth.createUserWithEmailAndPassword(
+                                                                    email:
+                                                                        _emailController
+                                                                            .text,
+                                                                    password:
+                                                                        _passwordController
+                                                                            .text);
+                                                            createUser(
+                                                              GuruUser(
                                                                 email:
                                                                     userCredential
                                                                         .user!
@@ -290,13 +284,34 @@ class _LandingPageState extends State<LandingPage>
                                                                     DateTime
                                                                         .now(),
                                                               ),
-                                                            ),
-                                                          );
+                                                            );
+                                                            await Get.offAll(
+                                                              () => TestPage(
+                                                                user: GuruUser(
+                                                                  email:
+                                                                      userCredential
+                                                                          .user!
+                                                                          .email,
+                                                                  zodiacSign:
+                                                                      sign,
+                                                                  joinDate:
+                                                                      DateTime
+                                                                          .now(),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          } else {
+                                                            feelmSnackbar(
+                                                              status.INFO,
+                                                              'Registration cancelled',
+                                                              'You must choose your birthdate.',
+                                                            );
+                                                          }
                                                         } else {
                                                           feelmSnackbar(
-                                                            status.INFO,
-                                                            'Registration cancelled',
-                                                            'You must choose your birthdate.',
+                                                            status.ERROR,
+                                                            'Error',
+                                                            'Τα πεδία του email και του κωδικού δε πρέπει να είναι κενά !',
                                                           );
                                                         }
                                                       } on FirebaseAuthException catch (e) {

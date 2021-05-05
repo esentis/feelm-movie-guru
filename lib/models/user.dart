@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
-import 'package:feelm/models/keyword.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 var users = kFirestore.collection('users');
