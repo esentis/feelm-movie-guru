@@ -75,13 +75,6 @@ class GuruUser {
       );
 }
 
-// class UserProvider extends ChangeNotifier {
-//   UserProvider({
-//     required this.currentUser,
-//   });
-//   GuruUser? currentUser;
-// }
-
 Future<bool> checkMail(String? email) async {
   var exists = false;
   await users.where('email', isEqualTo: email).get().then((qs) {
