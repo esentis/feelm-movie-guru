@@ -65,14 +65,14 @@ class _TestPageState extends State<TestPage> {
             ),
           ),
           Positioned(
-            top: 25,
-            left: 0,
+            top: 35,
+            left: -10,
             child: GestureDetector(
               onTap: () async {
                 cardController.forward(direction: SwipDirection.Right);
               },
               child: Lottie.asset(
-                'assets/left_swipe.json',
+                'assets/dislike.json',
                 height: 100,
                 width: 100,
               ),
@@ -102,7 +102,7 @@ class _TestPageState extends State<TestPage> {
                         ),
                       ),
                       Text(
-                        '$currentIndex/15',
+                        '${currentIndex - 1}/15',
                         textAlign: TextAlign.center,
                         style: kStyleLight.copyWith(
                           color: kColorMain,
@@ -118,13 +118,13 @@ class _TestPageState extends State<TestPage> {
           ),
           Positioned(
             top: 25,
-            right: 0,
+            right: -10,
             child: GestureDetector(
               onTap: () async {
                 cardController.forward(direction: SwipDirection.Right);
               },
               child: Lottie.asset(
-                'assets/right_swipe.json',
+                'assets/like.json',
                 height: 100,
                 width: 100,
               ),
