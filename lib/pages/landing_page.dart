@@ -3,13 +3,13 @@ import 'dart:ui';
 
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/user.dart';
+import 'package:feelm/pages/movie/widgets/custom_picker.dart';
 import 'package:feelm/pages/movies_screen.dart';
 import 'package:feelm/pages/test_page.dart';
 import 'package:feelm/widgets/feelm_snackbar.dart';
 import 'package:feelm/widgets/feelm_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_picker/flutter_picker.dart';
 import 'package:fluttericon/elusive_icons.dart';
 import 'package:fluttericon/zocial_icons.dart';
 import 'package:get/get.dart';
@@ -39,10 +39,11 @@ class _LandingPageState extends State<LandingPage>
 
   Future<String> showPickerDate(BuildContext context) async {
     var sign = '';
-    await Picker(
+    await CustomPicker(
       height: 150,
       hideHeader: true,
       headerColor: Colors.red,
+      backgroundColor: Colors.black,
       adapter: DateTimePickerAdapter(
         yearBegin: 1940,
         yearEnd: 2002,
@@ -75,7 +76,7 @@ class _LandingPageState extends State<LandingPage>
         color: kColorMain,
         fontSize: 20,
       ),
-      onConfirm: (Picker picker, List value) {
+      onConfirm: (CustomPicker picker, List value) {
         var date = (picker.adapter as DateTimePickerAdapter).value;
         kLog.wtf(getSign(date!));
         sign = getSign(date);
