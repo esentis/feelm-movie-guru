@@ -24,13 +24,13 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  var random;
+  late int random;
   TCardController cardController = TCardController();
 
   List<Keyword> includedKeys = [];
   List<Keyword> excludedKeys = [];
 
-  var currentIndex = 1;
+  int currentIndex = 1;
 
   @override
   void initState() {
@@ -49,8 +49,6 @@ class _TestPageState extends State<TestPage> {
             tween: 0.0.tweenTo(-350.0),
             duration: 55.seconds,
             builder: (context, child, value) => Positioned.fill(
-              bottom: 0,
-              top: 0,
               left: value,
               child: Image.asset(
                 'assets/collage$random.jpg',
@@ -142,22 +140,21 @@ class _TestPageState extends State<TestPage> {
                     return kSpinkit;
                   }
                   // ignore: omit_local_variable_types
-                  List<MovieReference> refs = [];
-                  snapshot.data!.docs.forEach(
-                    (qsDocument) {
-                      refs.add(MovieReference.fromMap(qsDocument.data()!));
-                    },
-                  );
+                  final List<MovieReference> refs = [];
+
+                  for (final qsDocument in snapshot.data!.docs) {
+                    refs.add(MovieReference.fromMap(qsDocument.data()!));
+                  }
                   // ignore: omit_local_variable_types
-                  List<Widget> cards = List.generate(
+                  final List<Widget> cards = List.generate(
                     refs.length,
                     (int index) {
                       return Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: [
-                            const BoxShadow(
+                          boxShadow: const [
+                            BoxShadow(
                               offset: Offset(0, 17),
                               blurRadius: 23.0,
                               spreadRadius: -13.0,
@@ -225,12 +222,12 @@ class _TestPageState extends State<TestPage> {
                                 .any((exKey) => inKey.name == exKey.name),
                           )
                           .toList();
-                      var includedKeywordIds = List.generate(
+                      final includedKeywordIds = List.generate(
                         includedKeys.length,
                         (index) => includedKeys[index].id.toString(),
                       ).toSet().toList();
 
-                      var excludedKeywordIds = List.generate(
+                      final excludedKeywordIds = List.generate(
                         excludedKeys.length,
                         (index) => excludedKeys[index].id.toString(),
                       ).toSet().toList();

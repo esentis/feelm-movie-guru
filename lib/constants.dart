@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 import 'package:supercharged/supercharged.dart';
@@ -10,26 +11,22 @@ import 'package:supercharged/supercharged.dart';
 String baseImgUrl = 'https://image.tmdb.org/t/p/w600_and_h900_bestv2';
 
 FirebaseFirestore kFirestore = FirebaseFirestore.instance;
-var kLog = Logger();
-var kAuth = FirebaseAuth.instance;
+Logger kLog = Logger();
+FirebaseAuth kAuth = FirebaseAuth.instance;
 
-TextStyle kStyleLight = const TextStyle(
-  fontFamily: 'JosefinSans',
-  fontSize: 20,
-  fontWeight: FontWeight.w100,
-);
+TextStyle kStyleLight = GoogleFonts.didactGothic();
 
 Color kColorMain = 'f9a821'.toColor();
 
 Color kColorGrey = 'bbbbbb'.toColor();
 
 Future<UserCredential?> signInWithFacebook() async {
-  var result = await FacebookAuth.instance
+  final result = await FacebookAuth.instance
       .login(); // Request email and the public profile
 
   if (result.status == LoginStatus.success) {
     // Create a credential from the access token
-    var facebookAuthCredential =
+    final facebookAuthCredential =
         FacebookAuthProvider.credential(result.accessToken!.token);
     // Once signed in, return the UserCredential
     return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
@@ -49,16 +46,16 @@ GoogleSignIn googleSignIn = GoogleSignIn(
 Future<UserCredential?> googleSign() async {
   try {
     // Trigger the authentication flow
-    var googleUser = await googleSignIn.signIn();
+    final googleUser = await googleSignIn.signIn();
     // Obtain the auth details from the request
-    var googleAuth = await googleUser?.authentication;
+    final googleAuth = await googleUser?.authentication;
     // Create a new credential
-    var credential = GoogleAuthProvider.credential(
+    final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth!.accessToken,
       idToken: googleAuth.idToken,
     );
     // Once signed in, return the UserCredential
-    var user = await FirebaseAuth.instance.signInWithCredential(credential);
+    final user = await FirebaseAuth.instance.signInWithCredential(credential);
     return user;
   } catch (error) {
     kLog.e(error);
@@ -124,7 +121,7 @@ String getSign(DateTime birthDate) {
   return 'ok';
 }
 
-var kSpinkit = SpinKitWanderingCubes(
+SpinKitWanderingCubes kSpinkit = SpinKitWanderingCubes(
   itemBuilder: (BuildContext context, int index) {
     return DecoratedBox(
       decoration: BoxDecoration(
