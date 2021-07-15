@@ -14,14 +14,15 @@ Dio omdb = Dio(dioOmdbOptions);
 
 Future<ImdbMovie> getImdbMovie(String id) async {
   try {
-    var response = await omdb.get(
+    final response = await omdb.get(
       '',
       queryParameters: {
         'i': id,
         'apiKey': env['OMDB_KEY'],
       },
     );
-    return ImdbMovie.fromMap(response.data);
+    final data = response.data.cast<String, dynamic>();
+    return ImdbMovie.fromMap(data);
   } on DioError catch (e) {
     kLog.e(e.message);
     return ImdbMovie.error();

@@ -40,7 +40,6 @@ class _LandingPageState extends State<LandingPage>
   Future<String> showPickerDate(BuildContext context) async {
     var sign = '';
     await CustomPicker(
-      height: 150,
       hideHeader: true,
       headerColor: Colors.red,
       backgroundColor: Colors.black,
@@ -76,8 +75,8 @@ class _LandingPageState extends State<LandingPage>
         color: kColorMain,
         fontSize: 20,
       ),
-      onConfirm: (CustomPicker picker, List value) {
-        var date = (picker.adapter as DateTimePickerAdapter).value;
+      onConfirm: (CustomPicker picker, List<dynamic> value) {
+        final date = (picker.adapter as DateTimePickerAdapter).value;
         kLog.wtf(getSign(date!));
         sign = getSign(date);
       },
@@ -102,8 +101,6 @@ class _LandingPageState extends State<LandingPage>
             tween: 0.0.tweenTo(-350.0),
             duration: 55.seconds,
             builder: (context, child, value) => Positioned.fill(
-              bottom: 0,
-              top: 0,
               left: value,
               child: Image.asset(
                 'assets/collage$random.jpg',
@@ -230,7 +227,7 @@ class _LandingPageState extends State<LandingPage>
                                                   onPressed: () async {
                                                     if (showLogin) {
                                                       try {
-                                                        var user = await kAuth
+                                                        final user = await kAuth
                                                             .signInWithEmailAndPassword(
                                                                 email:
                                                                     _emailController
@@ -238,7 +235,7 @@ class _LandingPageState extends State<LandingPage>
                                                                 password:
                                                                     _passwordController
                                                                         .text);
-                                                        var guruUser =
+                                                        final guruUser =
                                                             await getGuruUser(
                                                                 user.user!
                                                                     .email!);
@@ -248,7 +245,7 @@ class _LandingPageState extends State<LandingPage>
                                                             MoviesScreen());
                                                       } on FirebaseAuthException catch (e) {
                                                         feelmSnackbar(
-                                                          status.ERROR,
+                                                          status.error,
                                                           'Error',
                                                           e.message!,
                                                         );
@@ -261,11 +258,11 @@ class _LandingPageState extends State<LandingPage>
                                                             _passwordController
                                                                 .text
                                                                 .isNotEmpty) {
-                                                          var sign =
+                                                          final sign =
                                                               await showPickerDate(
                                                                   context);
                                                           if (sign.isNotEmpty) {
-                                                            var userCredential =
+                                                            final userCredential =
                                                                 await kAuth.createUserWithEmailAndPassword(
                                                                     email:
                                                                         _emailController
@@ -303,21 +300,21 @@ class _LandingPageState extends State<LandingPage>
                                                             );
                                                           } else {
                                                             feelmSnackbar(
-                                                              status.INFO,
+                                                              status.info,
                                                               'Registration cancelled',
                                                               'You must choose your birthdate.',
                                                             );
                                                           }
                                                         } else {
                                                           feelmSnackbar(
-                                                            status.ERROR,
+                                                            status.error,
                                                             'Error',
                                                             'Τα πεδία του email και του κωδικού δε πρέπει να είναι κενά !',
                                                           );
                                                         }
                                                       } on FirebaseAuthException catch (e) {
                                                         feelmSnackbar(
-                                                          status.ERROR,
+                                                          status.error,
                                                           'Error',
                                                           e.message!,
                                                         );
@@ -411,13 +408,14 @@ class _LandingPageState extends State<LandingPage>
                                     Flexible(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          var user = await signInWithFacebook();
+                                          final user =
+                                              await signInWithFacebook();
                                           if (user != null) {
                                             if (await checkMail(
                                                 user.user!.email)) {
                                               kLog.i(
                                                   '${user.user!.email} is not a user');
-                                              var sign =
+                                              final sign =
                                                   await showPickerDate(context);
                                               if (sign.isNotEmpty) {
                                                 createUser(
@@ -438,14 +436,15 @@ class _LandingPageState extends State<LandingPage>
                                                 );
                                               } else {
                                                 feelmSnackbar(
-                                                  status.INFO,
+                                                  status.info,
                                                   'Registration cancelled',
                                                   'You must choose your birthdate.',
                                                 );
                                               }
                                             } else {
-                                              var guruUser = await getGuruUser(
-                                                  user.user!.email!);
+                                              final guruUser =
+                                                  await getGuruUser(
+                                                      user.user!.email!);
                                               if (!guruUser!.tested!) {
                                                 await Get.offAll(
                                                   () => TestPage(
@@ -460,7 +459,7 @@ class _LandingPageState extends State<LandingPage>
                                             }
                                           } else {
                                             feelmSnackbar(
-                                              status.ERROR,
+                                              status.error,
                                               'Cancelled',
                                               'Facebook login cancelled.',
                                             );
@@ -479,13 +478,13 @@ class _LandingPageState extends State<LandingPage>
                                     Flexible(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          var user = await googleSign();
+                                          final user = await googleSign();
                                           if (user != null) {
                                             if (await checkMail(
                                                 user.user!.email)) {
                                               kLog.i(
                                                   '${user.user!.email} is not a user');
-                                              var sign =
+                                              final sign =
                                                   await showPickerDate(context);
                                               if (sign.isNotEmpty) {
                                                 createUser(
@@ -506,14 +505,15 @@ class _LandingPageState extends State<LandingPage>
                                                 );
                                               } else {
                                                 feelmSnackbar(
-                                                  status.INFO,
+                                                  status.info,
                                                   'Registration cancelled',
                                                   'You must choose your birthdate.',
                                                 );
                                               }
                                             } else {
-                                              var guruUser = await getGuruUser(
-                                                  user.user!.email!);
+                                              final guruUser =
+                                                  await getGuruUser(
+                                                      user.user!.email!);
                                               kLog.wtf(guruUser!.tested);
                                               if (!guruUser.tested!) {
                                                 await Get.to(
@@ -529,7 +529,7 @@ class _LandingPageState extends State<LandingPage>
                                             }
                                           } else {
                                             feelmSnackbar(
-                                              status.INFO,
+                                              status.info,
                                               'Cancelled',
                                               'Google login cancelled.',
                                             );

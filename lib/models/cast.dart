@@ -70,33 +70,33 @@ class Cast {
 }
 
 enum Department {
-  ACTING,
-  WRITING,
-  CREW,
-  VISUAL_EFFECTS,
-  DIRECTING,
-  PRODUCTION,
-  COSTUME_MAKE_UP,
-  ART,
-  SOUND,
-  CAMERA,
-  EDITING,
-  LIGHTING
+  acting,
+  writing,
+  crew,
+  visualEffects,
+  directing,
+  production,
+  customeMakeUp,
+  art,
+  sound,
+  camera,
+  editing,
+  lighting
 }
 
 final departmentValues = EnumValues({
-  'Acting': Department.ACTING,
-  'Art': Department.ART,
-  'Camera': Department.CAMERA,
-  'Costume & Make-Up': Department.COSTUME_MAKE_UP,
-  'Crew': Department.CREW,
-  'Directing': Department.DIRECTING,
-  'Editing': Department.EDITING,
-  'Lighting': Department.LIGHTING,
-  'Production': Department.PRODUCTION,
-  'Sound': Department.SOUND,
-  'Visual Effects': Department.VISUAL_EFFECTS,
-  'Writing': Department.WRITING
+  'Acting': Department.acting,
+  'Art': Department.art,
+  'Camera': Department.camera,
+  'Costume & Make-Up': Department.customeMakeUp,
+  'Crew': Department.crew,
+  'Directing': Department.directing,
+  'Editing': Department.editing,
+  'Lighting': Department.lighting,
+  'Production': Department.production,
+  'Sound': Department.sound,
+  'Visual Effects': Department.visualEffects,
+  'Writing': Department.writing
 });
 
 class EnumValues<T> {
@@ -106,7 +106,6 @@ class EnumValues<T> {
   EnumValues(this.map);
 
   Map<T, String>? get reverse {
-    reverseMap ??= map.map((k, v) => MapEntry(v, k));
-    return reverseMap;
+    return reverseMap ??= map.map((k, v) => MapEntry(v, k));
   }
 }

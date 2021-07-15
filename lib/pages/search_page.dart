@@ -22,7 +22,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  late var random = 0;
+  late int random = 0;
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -51,8 +51,6 @@ class _SearchPageState extends State<SearchPage> {
               tween: 0.0.tweenTo(-350.0),
               duration: 55.seconds,
               builder: (context, child, value) => Positioned.fill(
-                bottom: 0,
-                top: 0,
                 left: value,
                 child: Image.asset(
                   'assets/collage$random.jpg',
@@ -67,7 +65,7 @@ class _SearchPageState extends State<SearchPage> {
             ),
             Positioned(
               top: 45,
-              child: Container(
+              child: SizedBox(
                 height: 70,
                 width: MediaQuery.of(context).size.width,
                 child: Row(
@@ -115,7 +113,7 @@ class _SearchPageState extends State<SearchPage> {
                           return searchMovies(pattern);
                         },
                         suggestionsBoxVerticalOffset: 0,
-                        noItemsFoundBuilder: (context) => Container(
+                        noItemsFoundBuilder: (context) => SizedBox(
                           height: 40,
                           child: Center(
                             child: Text(
@@ -135,8 +133,8 @@ class _SearchPageState extends State<SearchPage> {
                           setState(() {
                             isLoading = !isLoading;
                           });
-                          var videos = await getVideos(movie.id!);
-                          var detailedMovie = await getMovies(movie.id!);
+                          final videos = await getVideos(movie.id!);
+                          final detailedMovie = await getMovies(movie.id!);
                           var imdbMovie = ImdbMovie();
                           if (detailedMovie.imdbId != null) {
                             imdbMovie =

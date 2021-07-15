@@ -32,7 +32,7 @@ class MovieDetailsScreen extends StatefulWidget {
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late YoutubePlayerController _controller;
   Future<String?> movieVideos() async {
-    var x = await getVideos(widget.movie.id!);
+    final x = await getVideos(widget.movie.id!);
     kLog.wtf(x?.results.first.key);
     return x?.results.first.key;
   }
@@ -43,7 +43,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       _controller = YoutubePlayerController(
         initialVideoId: widget.videos.results.first.key,
         flags: const YoutubePlayerFlags(
-          autoPlay: true,
           mute: true,
         ),
       );
@@ -64,7 +63,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             shadowColor: kColorMain.withOpacity(0.5),
             elevation: 10,
             floating: true,
-            pinned: false,
             toolbarHeight: 250,
             expandedHeight: 450,
             leading: IconButton(
@@ -83,14 +81,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     return kSpinkit;
                   }
                   // ignore: omit_local_variable_types
-                  List<Favorite> favs = [];
-                  snapshot.data!.docs.forEach(
-                    (qsDocument) {
-                      favs.add(Favorite.fromMap(qsDocument.data()!));
-                    },
-                  );
+                  final List<Favorite> favs = [];
 
-                  var isFavorited = favs.any(
+                  for (final qsDocument in snapshot.data!.docs) {
+                    favs.add(Favorite.fromMap(qsDocument.data()!));
+                  }
+                  final isFavorited = favs.any(
                     (fav) =>
                         fav.movieId == widget.movie.id! &&
                         fav.email == kAuth.currentUser!.email,
@@ -119,14 +115,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   await Share.share(
                     widget.movie.overview!.isEmpty
                         ? 'Ημ/νια κυκλοφορίας : \n${formatDate(widget.movie.releaseDate!, [
-                            d,
-                            ' ',
-                            MM,
-                            ' ',
-                            yyyy
-                          ])}\n\n${widget.imdbMovie?.plot!}\n${baseImgUrl + widget.movie.posterPath!}'
+                                d,
+                                ' ',
+                                MM,
+                                ' ',
+                                yyyy
+                              ])}\n\n${widget.imdbMovie?.plot!}\n${baseImgUrl + widget.movie.posterPath!}'
                         : '${widget.movie.overview!} ${baseImgUrl + widget.movie.posterPath!}',
-                    subject: widget.movie.title!,
+                    subject: widget.movie.title,
                   );
                 },
                 icon: Icon(
@@ -153,9 +149,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         )
                       : ExtendedImage.network(
                           baseImgUrl + widget.movie.posterPath!,
-                          cache: true,
                           fit: BoxFit.cover,
-                          enableLoadState: true,
                           // ignore: missing_return
                           loadStateChanged: (state) {
                             if (state.extendedImageLoadState ==
@@ -194,22 +188,22 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      widget.movie.title != widget.movie.originalTitle
-                          ? Text(
-                              widget.movie.originalTitle!,
-                              style: kStyleLight.copyWith(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                                color: 'ffc93c'.toColor(),
-                              ),
-                              textAlign: TextAlign.center,
-                            )
-                          : const SizedBox(),
+                      if (widget.movie.title != widget.movie.originalTitle)
+                        Text(
+                          widget.movie.originalTitle!,
+                          style: kStyleLight.copyWith(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: 'ffc93c'.toColor(),
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                      else
+                        const SizedBox(),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (widget.imdbMovie != null)
                               InfoContainer(

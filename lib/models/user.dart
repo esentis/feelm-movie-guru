@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-var users = kFirestore.collection('users');
+CollectionReference users = kFirestore.collection('users');
 
 extension UserExtensions on User? {
   Future<GuruUser> toGuruUser() async {
@@ -33,29 +33,29 @@ class GuruUser {
 
   String? get getIncludedKeywords => includedKeywords;
 
-  set setIncludedKeywords(includedKeywords) =>
-      this.includedKeywords = includedKeywords;
+  // set setIncludedKeywords(includedKeywords) =>
+  //     this.includedKeywords = includedKeywords;
 
-  String? get getExcludedKeywords => excludedKeywords;
+  // String? get getExcludedKeywords => excludedKeywords;
 
-  set setExcludedKeywords(excludedKeywords) =>
-      this.excludedKeywords = excludedKeywords;
+  // set setExcludedKeywords(excludedKeywords) =>
+  //     this.excludedKeywords = excludedKeywords;
 
-  bool? get getTested => tested;
+  // bool? get getTested => tested;
 
-  set setTested(tested) => this.tested = tested;
+  // set setTested(tested) => this.tested = tested;
 
-  String? get getEmail => email;
+  // String? get getEmail => email;
 
-  set setEmail(email) => this.email = email;
+  // set setEmail(email) => this.email = email;
 
-  DateTime? get getJoinDate => joinDate;
+  // DateTime? get getJoinDate => joinDate;
 
-  set setJoinDate(joinDate) => this.joinDate = joinDate;
+  // set setJoinDate(joinDate) => this.joinDate = joinDate;
 
   String? get getZodiacSign => zodiacSign;
 
-  set setZodiacSign(zodiacSign) => this.zodiacSign = zodiacSign;
+  // set setZodiacSign(zodiacSign) => this.zodiacSign = zodiacSign;
   GuruUser({
     this.zodiacSign,
     this.email,
@@ -66,7 +66,7 @@ class GuruUser {
   });
 
   factory GuruUser.fromMap(Map<String, dynamic> map) => GuruUser(
-        zodiacSign: map['zodiacSign']!,
+        zodiacSign: map['zodiacSign'],
         email: map['email'] ?? kAuth.currentUser!.email,
         joinDate: (map['joinDate']! as Timestamp).toDate(),
         tested: map['tested'] ?? false,
@@ -110,21 +110,17 @@ Future<void> updateUser(GuruUser user) async {
   await users.where('email', isEqualTo: user.email).get().then(
     (qs) {
       if (qs.docs.isNotEmpty) {
-        // ignore: omit_local_variable_types
-
-        qs.docs.forEach(
-          (snap) {
-            users
-                .doc(snap.reference.id)
-                .update({
-                  'includedKeywords': user.includedKeywords,
-                  'excludedKeywords': user.excludedKeywords,
-                  'tested': true,
-                })
-                .then((value) => kLog.i('User Updated'))
-                .catchError((error) => kLog.e('Failed to update user: $error'));
-          },
-        );
+        for (final snap in qs.docs) {
+          users
+              .doc(snap.reference.id)
+              .update({
+                'includedKeywords': user.includedKeywords,
+                'excludedKeywords': user.excludedKeywords,
+                'tested': true,
+              })
+              .then((value) => kLog.i('User Updated'))
+              .catchError((error) => kLog.e('Failed to update user: $error'));
+        }
       }
     },
     // ignore: return_of_invalid_type_from_catch_error

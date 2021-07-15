@@ -11,11 +11,11 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await DotEnv.load(fileName: '.env');
-  var currentUser = await FirebaseAuth.instance.currentUser?.toGuruUser();
+  await DotEnv.load();
+  final currentUser = await FirebaseAuth.instance.currentUser?.toGuruUser();
   // check if is running on Web
   if (kIsWeb) {
     // initialiaze the facebook javascript SDK

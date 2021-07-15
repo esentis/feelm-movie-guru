@@ -13,8 +13,8 @@ BaseOptions dioTmdbOptions = BaseOptions(
 Dio tmdb = Dio(dioTmdbOptions);
 
 /// Returns movies based on a search [term].
-Future getTrending() async {
-  Response response;
+Future<List<Movie>?> getTrending() async {
+  Response<dynamic> response;
   try {
     response = await tmdb.get(
       '/3/trending/movie/day',
@@ -25,10 +25,10 @@ Future getTrending() async {
     kLog.i('Getting trending movies.');
   } on DioError catch (e) {
     kLog.e(e);
-    return e.type;
+    return null;
   }
   // ignore: omit_local_variable_types
-  List<Movie> trendingMovies = [];
+  final List<Movie> trendingMovies = [];
   response.data['results'].forEach((jsonMovie) {
     trendingMovies.add(Movie.fromMap(jsonMovie));
   });
@@ -40,7 +40,7 @@ Future<List<Movie>> searchMovies(String term) async {
   if (term.isEmpty) {
     return [];
   }
-  Response response;
+  Response<dynamic> response;
   try {
     response = await tmdb.get(
       '/3/search/movie',
@@ -58,14 +58,15 @@ Future<List<Movie>> searchMovies(String term) async {
     return [];
   }
   // ignore: omit_local_variable_types
-  MovieSearchResults searchResults = MovieSearchResults.fromMap(response.data);
+  final MovieSearchResults searchResults =
+      MovieSearchResults.fromMap(response.data);
 
   return searchResults.results!;
 }
 
 /// Returns movies based on [id].
 Future<MovieDetailed> getMovies(int id) async {
-  Response response;
+  Response<dynamic> response;
   try {
     response = await tmdb.get(
       '/3/movie/$id',
@@ -79,13 +80,13 @@ Future<MovieDetailed> getMovies(int id) async {
     return Future.value(null);
   }
   // ignore: omit_local_variable_types
-  MovieDetailed detailedMovie = MovieDetailed.fromMap(response.data);
+  final MovieDetailed detailedMovie = MovieDetailed.fromMap(response.data);
   return detailedMovie;
 }
 
 /// Returns the cast and crew for a movie with [id].
-Future getCredits(int id) async {
-  Response response;
+Future<MovieCredits?> getCredits(int id) async {
+  Response<dynamic> response;
   try {
     response = await tmdb.get(
       '/3/movie/$id/credits',
@@ -96,16 +97,16 @@ Future getCredits(int id) async {
     kLog.i('Getting credings for movie with ID : $id.');
   } on DioError catch (e) {
     kLog.e(e);
-    return e.type;
+    return null;
   }
   // ignore: omit_local_variable_types
-  MovieCredits movieCredits = MovieCredits.fromMap(response.data);
+  final MovieCredits movieCredits = MovieCredits.fromMap(response.data);
   return movieCredits;
 }
 
 /// Returns the upcoming movies.
-Future getUpcoming() async {
-  Response response;
+Future<List<Movie>?> getUpcoming() async {
+  Response<dynamic> response;
   try {
     response = await tmdb.get(
       '/3/movie/upcoming',
@@ -119,10 +120,10 @@ Future getUpcoming() async {
     kLog.i('Getting upcoming movies');
   } on DioError catch (e) {
     kLog.e(e);
-    return e.type;
+    return null;
   }
   // ignore: omit_local_variable_types
-  List<Movie> upcomingMovies = [];
+  final List<Movie> upcomingMovies = [];
   response.data['results'].forEach((jsonMovie) {
     upcomingMovies.add(Movie.fromMap(jsonMovie));
   });
@@ -132,7 +133,7 @@ Future getUpcoming() async {
 /// Search for movie keywords associated with a specific [term].
 Future<KeywordResults> getKeywords(String term) async {
   try {
-    var response = await tmdb.get(
+    final response = await tmdb.get(
       '/3/search/keyword',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
@@ -162,7 +163,7 @@ Future<List<Movie>> discoverMovies({
   kLog.i(
       'Included keywords $includedKeywords\nExcluded keyword $excludedKeywords');
   try {
-    var response = await tmdb.get(
+    final response = await tmdb.get(
       '/3/discover/movie',
       queryParameters: {
         'api_key': env['TMDB_KEY'],
@@ -173,7 +174,7 @@ Future<List<Movie>> discoverMovies({
       },
     );
     kLog.i('Current page $page');
-    var discoveredMovies = <Movie>[];
+    final discoveredMovies = <Movie>[];
     response.data['results'].forEach(
       (jsonMovie) {
         discoveredMovies.add(Movie.fromMap(jsonMovie));
@@ -195,7 +196,7 @@ Future<List<Movie>> discoverMovies({
 /// which returns a list of keywords used by movies.
 Future<MovieVideos?> getVideos(int id) async {
   try {
-    var response = await tmdb.get(
+    final response = await tmdb.get(
       '/3/movie/$id/videos',
       queryParameters: {
         'api_key': env['TMDB_KEY'],

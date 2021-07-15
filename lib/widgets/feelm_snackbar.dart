@@ -4,9 +4,9 @@ import 'package:supercharged/supercharged.dart';
 import 'package:get/get.dart';
 
 enum status {
-  SUCCESS,
-  ERROR,
-  INFO,
+  success,
+  error,
+  info,
 }
 
 void feelmSnackbar(status status, String title, String body) {

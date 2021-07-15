@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 
-var favorites = kFirestore.collection('favorites');
+CollectionReference favorites = kFirestore.collection('favorites');
 
 class Favorite {
   String email;
@@ -19,20 +19,16 @@ class Favorite {
 
 Future<List<Favorite>> getUserFavorites() async {
   // ignore: omit_local_variable_types
-  List<Favorite> favList = [];
+  final List<Favorite> favList = [];
   await favorites
       .where('email', isEqualTo: kAuth.currentUser!.email)
       .get()
       .then(
     (qs) {
       if (qs.docs.isNotEmpty) {
-        // ignore: omit_local_variable_types
-
-        qs.docs.forEach(
-          (snap) {
-            favList.add(Favorite.fromMap(snap.data()!));
-          },
-        );
+        for (final snap in qs.docs) {
+          favList.add(Favorite.fromMap(snap.data()!));
+        }
       }
     },
   );
@@ -51,18 +47,16 @@ Future<void> toggleFavorite(Favorite favorite) async {
     (qs) {
       if (qs.docs.isNotEmpty) {
         // ignore: omit_local_variable_types
-        List<Favorite> favorites = [];
-        qs.docs.forEach(
-          (snap) {
-            var fav = Favorite.fromMap(snap.data()!);
-            if (fav.movieId == favorite.movieId &&
-                favorite.email == fav.email) {
-              docRefForDeletion = snap.reference.id;
-            } else {
-              favorites.add(fav);
-            }
-          },
-        );
+        final List<Favorite> favorites = [];
+
+        for (final snap in qs.docs) {
+          final fav = Favorite.fromMap(snap.data()!);
+          if (fav.movieId == favorite.movieId && favorite.email == fav.email) {
+            docRefForDeletion = snap.reference.id;
+          } else {
+            favorites.add(fav);
+          }
+        }
       }
     },
   );

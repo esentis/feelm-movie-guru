@@ -32,7 +32,7 @@ class MoviesScreen extends StatefulWidget {
 }
 
 class _MoviesScreenState extends State<MoviesScreen> {
-  late var random;
+  late int random;
   late List<Keyword> words;
   late List<ZodiacSign> signs;
   late GuruUser? currentGuruUser;
@@ -59,7 +59,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
     usersSign =
         signs.firstWhere((sign) => sign.name == currentGuruUser?.zodiacSign);
 
-    var keywordIds = List.generate(
+    final keywordIds = List.generate(
       usersSign.keywords.length,
       (index) => usersSign.keywords[index].id.toString(),
     );
@@ -72,17 +72,17 @@ class _MoviesScreenState extends State<MoviesScreen> {
   Future<void> _fetchPage(int pageKey) async {
     try {
       // ignore: omit_local_variable_types
-      List<Movie> newItems = await discoverMovies(
+      final List<Movie> newItems = await discoverMovies(
         includedKeywords: includeKeywords,
         excludedKeywords: excludeKeywords,
         page: page,
       );
-      var isLastPage = newItems.length < _pageSize;
+      final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         kLog.w('Got to last page !');
         _pagingController.appendLastPage(newItems);
       } else {
-        var nextPageKey = pageKey + newItems.length;
+        final nextPageKey = pageKey + newItems.length;
         _pagingController.appendPage(newItems, nextPageKey);
         page++;
       }
@@ -121,12 +121,11 @@ class _MoviesScreenState extends State<MoviesScreen> {
             return kSpinkit;
           }
           // ignore: omit_local_variable_types
-          List<Favorite> favs = [];
-          snapshot.data!.docs.forEach(
-            (qsDocument) {
-              favs.add(Favorite.fromMap(qsDocument.data()!));
-            },
-          );
+          final List<Favorite> favs = [];
+
+          for (final qsDocument in snapshot.data!.docs) {
+            favs.add(Favorite.fromMap(qsDocument.data()!));
+          }
           return Scaffold(
             body: Stack(
               fit: StackFit.expand,
@@ -135,8 +134,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   tween: 0.0.tweenTo(-350.0),
                   duration: 55.seconds,
                   builder: (context, child, value) => Positioned.fill(
-                    bottom: 0,
-                    top: 0,
                     left: value,
                     child: Image.asset(
                       'assets/collage$random.jpg',
@@ -276,7 +273,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                         itemBuilder: (context, movie, index) =>
                                             StatefulBuilder(
                                           builder: (context, stateSetter) {
-                                            return Container(
+                                            return SizedBox(
                                               width: 250,
                                               height: 70,
                                               child: ModalProgressHUD(
@@ -287,13 +284,13 @@ class _MoviesScreenState extends State<MoviesScreen> {
                                                     stateSetter(() {
                                                       isLoading = !isLoading;
                                                     });
-                                                    var videos =
+                                                    final videos =
                                                         await getVideos(
                                                             movie.id!);
-                                                    var detailedMovie =
+                                                    final detailedMovie =
                                                         await getMovies(
                                                             movie.id!);
-                                                    var imdbMovie =
+                                                    final imdbMovie =
                                                         await getImdbMovie(
                                                             detailedMovie
                                                                 .imdbId!);

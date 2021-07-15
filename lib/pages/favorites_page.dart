@@ -26,7 +26,7 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  late var random;
+  late int random;
 
   int page = 1;
 
@@ -43,8 +43,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       favoritedMovies = [];
     }
 
-    for (var fav in widget.userFavorites) {
-      var detailedMovie = await getMovies(fav.movieId);
+    for (final fav in widget.userFavorites) {
+      final MovieDetailed detailedMovie = await getMovies(fav.movieId);
       favoritedMovies.add(detailedMovie);
     }
     setState(() {
@@ -75,8 +75,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               tween: 0.0.tweenTo(-350.0),
               duration: 55.seconds,
               builder: (context, child, value) => Positioned.fill(
-                bottom: 0,
-                top: 0,
                 left: value,
                 child: Image.asset(
                   'assets/collage$random.jpg',
@@ -152,9 +150,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                 setState(() {
                                   isLoading = !isLoading;
                                 });
-                                var videos =
+                                final videos =
                                     await getVideos(favoritedMovies[index].id!);
-                                var imdbMovie = await getImdbMovie(
+                                final imdbMovie = await getImdbMovie(
                                     favoritedMovies[index].imdbId!);
                                 setState(() {
                                   isLoading = !isLoading;
