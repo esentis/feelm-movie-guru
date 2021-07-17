@@ -18,7 +18,7 @@ Future<ImdbMovie> getImdbMovie(String id) async {
       '',
       queryParameters: {
         'i': id,
-        'apiKey': env['OMDB_KEY'],
+        'apiKey': dotenv.env['OMDB_KEY'],
       },
     );
     final data = response.data.cast<String, dynamic>();

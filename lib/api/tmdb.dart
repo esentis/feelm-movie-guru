@@ -19,7 +19,7 @@ Future<List<Movie>?> getTrending() async {
     response = await tmdb.get(
       '/3/trending/movie/day',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
       },
     );
     kLog.i('Getting trending movies.');
@@ -45,7 +45,7 @@ Future<List<Movie>> searchMovies(String term) async {
     response = await tmdb.get(
       '/3/search/movie',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'language': 'el-GR',
         'include_adult': false,
         'page': 1,
@@ -71,7 +71,7 @@ Future<MovieDetailed> getMovies(int id) async {
     response = await tmdb.get(
       '/3/movie/$id',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'language': 'el-GR',
       },
     );
@@ -91,7 +91,7 @@ Future<MovieCredits?> getCredits(int id) async {
     response = await tmdb.get(
       '/3/movie/$id/credits',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
       },
     );
     kLog.i('Getting credings for movie with ID : $id.');
@@ -111,7 +111,7 @@ Future<List<Movie>?> getUpcoming() async {
     response = await tmdb.get(
       '/3/movie/upcoming',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'language': 'en-US',
         'include_adult': false,
         'page': 1,
@@ -136,7 +136,7 @@ Future<KeywordResults> getKeywords(String term) async {
     final response = await tmdb.get(
       '/3/search/keyword',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'query': term,
       },
     );
@@ -166,7 +166,7 @@ Future<List<Movie>> discoverMovies({
     final response = await tmdb.get(
       '/3/discover/movie',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'with_keywords': includedKeywords,
         'without_keywords': excludedKeywords,
         'page': page,
@@ -199,7 +199,7 @@ Future<MovieVideos?> getVideos(int id) async {
     final response = await tmdb.get(
       '/3/movie/$id/videos',
       queryParameters: {
-        'api_key': env['TMDB_KEY'],
+        'api_key': dotenv.env['TMDB_KEY'],
         'language': 'el-GR',
       },
     );
