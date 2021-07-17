@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 import 'package:feelm/models/keyword.dart';
 
-CollectionReference references = kFirestore.collection('references');
+CollectionReference<Map<String, dynamic>> references =
+    kFirestore.collection('references');
 
 class MovieReference {
   String name;
@@ -32,7 +33,7 @@ Future<List<MovieReference>> getReferences() async {
     (qs) {
       if (qs.docs.isNotEmpty) {
         for (final snap in qs.docs) {
-          refs.add(MovieReference.fromMap(snap.data()!));
+          refs.add(MovieReference.fromMap(snap.data()));
         }
       }
     },
@@ -40,6 +41,6 @@ Future<List<MovieReference>> getReferences() async {
   return refs;
 }
 
-Stream<QuerySnapshot> getReferencesStream() {
+Stream<QuerySnapshot<Map<String, dynamic>>> getReferencesStream() {
   return references.snapshots();
 }

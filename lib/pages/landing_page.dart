@@ -30,7 +30,7 @@ class _LandingPageState extends State<LandingPage>
   int? random;
 
   CustomAnimationControl _loginContainerAnimationController =
-      CustomAnimationControl.PLAY_REVERSE;
+      CustomAnimationControl.playReverse;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -387,12 +387,12 @@ class _LandingPageState extends State<LandingPage>
                                         setState(
                                           () {
                                             _loginContainerAnimationController ==
-                                                    CustomAnimationControl.PLAY
+                                                    CustomAnimationControl.play
                                                 ? _loginContainerAnimationController =
                                                     CustomAnimationControl
-                                                        .PLAY_REVERSE
+                                                        .playReverse
                                                 : _loginContainerAnimationController =
-                                                    CustomAnimationControl.PLAY;
+                                                    CustomAnimationControl.play;
                                           },
                                         );
                                       },

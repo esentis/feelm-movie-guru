@@ -74,7 +74,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               ),
             ),
             actions: [
-              StreamBuilder<QuerySnapshot>(
+              StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: getUserFavoritesStream(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -84,7 +84,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   final List<Favorite> favs = [];
 
                   for (final qsDocument in snapshot.data!.docs) {
-                    favs.add(Favorite.fromMap(qsDocument.data()!));
+                    favs.add(Favorite.fromMap(qsDocument.data()));
                   }
                   final isFavorited = favs.any(
                     (fav) =>

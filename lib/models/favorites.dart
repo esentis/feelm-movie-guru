@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 
-CollectionReference favorites = kFirestore.collection('favorites');
+CollectionReference<Map<String, dynamic>> favorites =
+    kFirestore.collection('favorites');
 
 class Favorite {
   String email;
@@ -27,7 +28,7 @@ Future<List<Favorite>> getUserFavorites() async {
     (qs) {
       if (qs.docs.isNotEmpty) {
         for (final snap in qs.docs) {
-          favList.add(Favorite.fromMap(snap.data()!));
+          favList.add(Favorite.fromMap(snap.data()));
         }
       }
     },
@@ -35,7 +36,7 @@ Future<List<Favorite>> getUserFavorites() async {
   return favList;
 }
 
-Stream<QuerySnapshot> getUserFavoritesStream() {
+Stream<QuerySnapshot<Map<String, dynamic>>> getUserFavoritesStream() {
   return favorites
       .where('email', isEqualTo: kAuth.currentUser!.email)
       .snapshots();
@@ -50,7 +51,7 @@ Future<void> toggleFavorite(Favorite favorite) async {
         final List<Favorite> favorites = [];
 
         for (final snap in qs.docs) {
-          final fav = Favorite.fromMap(snap.data()!);
+          final fav = Favorite.fromMap(snap.data());
           if (fav.movieId == favorite.movieId && favorite.email == fav.email) {
             docRefForDeletion = snap.reference.id;
           } else {

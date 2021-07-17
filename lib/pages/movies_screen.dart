@@ -114,7 +114,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: getUserFavoritesStream(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -124,7 +124,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
           final List<Favorite> favs = [];
 
           for (final qsDocument in snapshot.data!.docs) {
-            favs.add(Favorite.fromMap(qsDocument.data()!));
+            favs.add(Favorite.fromMap(qsDocument.data()));
           }
           return Scaffold(
             body: Stack(

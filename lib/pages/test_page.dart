@@ -133,7 +133,7 @@ class _TestPageState extends State<TestPage> {
             bottom: 0,
             right: 10,
             left: 10,
-            child: StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: getReferencesStream(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
@@ -143,7 +143,7 @@ class _TestPageState extends State<TestPage> {
                   final List<MovieReference> refs = [];
 
                   for (final qsDocument in snapshot.data!.docs) {
-                    refs.add(MovieReference.fromMap(qsDocument.data()!));
+                    refs.add(MovieReference.fromMap(qsDocument.data()));
                   }
                   // ignore: omit_local_variable_types
                   final List<Widget> cards = List.generate(

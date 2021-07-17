@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feelm/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-CollectionReference users = kFirestore.collection('users');
+CollectionReference<Map<String, dynamic>> users =
+    kFirestore.collection('users');
 
 extension UserExtensions on User? {
   Future<GuruUser> toGuruUser() async {
@@ -11,7 +12,7 @@ extension UserExtensions on User? {
       await users.where('email', isEqualTo: this!.email).get().then(
         (qs) {
           if (qs.docs.isNotEmpty) {
-            user = GuruUser.fromMap(qs.docs.first.data()!);
+            user = GuruUser.fromMap(qs.docs.first.data());
             kLog.wtf('${user.email} is logged in.');
 
             // return GuruUser.fromMap(qs.docs.first.data()!);
@@ -87,7 +88,7 @@ Future<bool> checkMail(String? email) async {
 Future<GuruUser?> getGuruUser(String email) async {
   GuruUser? user;
   await users.where('email', isEqualTo: email).get().then((qs) {
-    user = GuruUser.fromMap(qs.docs.first.data()!);
+    user = GuruUser.fromMap(qs.docs.first.data());
   });
 
   return user;
