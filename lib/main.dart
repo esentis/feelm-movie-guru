@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,11 +27,20 @@ Future<void> main() async {
       version: 'v9.0',
     );
   }
-  runApp(
-    GetMaterialApp(
-      title: 'Feelm Movie Guru',
-      debugShowCheckedModeBanner: false,
-      home: FeelMeRoot(currentUser),
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = dotenv.env['SENTRY_DSN'];
+    },
+    // Init your App.
+    appRunner: () => runApp(
+      GetMaterialApp(
+        navigatorObservers: [
+          SentryNavigatorObserver(),
+        ],
+        title: 'Feelm Movie Guru',
+        debugShowCheckedModeBanner: false,
+        home: FeelMeRoot(currentUser),
+      ),
     ),
   );
 }
