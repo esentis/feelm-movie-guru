@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 import 'dart:math';
 import 'dart:ui';
 
@@ -19,12 +21,12 @@ import 'package:feelm/pages/movie/movie_details_screen.dart';
 import 'package:feelm/pages/search_page.dart';
 import 'package:feelm/providers/signs_and_keywords.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttericon/mfg_labs_icons.dart';
 import 'package:get/get.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:modal_progress_hud_alt/modal_progress_hud_alt.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:supercharged/supercharged.dart';
-import 'package:fluttericon/mfg_labs_icons.dart';
 
 class MoviesScreen extends StatefulWidget {
   @override

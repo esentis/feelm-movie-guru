@@ -28,9 +28,10 @@ class ZodiacSign {
       );
 
   factory ZodiacSign.error() => ZodiacSign(
-      from: DateTime.now(),
-      keywords: [],
-      name: 'Error',
-      to: DateTime.now(),
-      image: '');
+        from: DateTime.now(),
+        keywords: [],
+        name: 'Error',
+        to: DateTime.now(),
+        image: '',
+      );
 }

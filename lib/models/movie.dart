@@ -2,7 +2,10 @@
 //
 //     final movie = movieFromMap(jsonString);
 
+// ignore_for_file: require_trailing_commas
+
 import 'dart:convert';
+
 import 'package:feelm/models/cast.dart';
 import 'package:feelm/models/country.dart';
 import 'package:feelm/models/genre.dart';

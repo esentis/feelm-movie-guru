@@ -1,3 +1,5 @@
+// ignore_for_file: require_trailing_commas
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_format/date_format.dart';
 import 'package:extended_image/extended_image.dart';
@@ -13,8 +15,8 @@ import 'package:fluttericon/font_awesome5_icons.dart';
 import 'package:fluttericon/mfg_labs_icons.dart';
 import 'package:get/get.dart';
 import 'package:share/share.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:supercharged/supercharged.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final MovieDetailed movie;
